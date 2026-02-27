@@ -1,0 +1,39 @@
+@page "/dashboard/player/{PlayerId:int}"
+@using DartPerformanceTracker.Shared.DTOs
+@inject HttpClient Http
+
+<h3>Player Dashboard</h3>
+
+@if (dashboard == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <h4>@dashboard.PlayerName - @dashboard.TeamName</h4>
+    <div class="row mb-3">
+        <div class="col"><strong>Matches Played:</strong> @dashboard.MatchesPlayed</div>
+        <div class="col"><strong>Won:</strong> @dashboard.MatchesWon</div>
+        <div class="col"><strong>Lost:</strong> @dashboard.MatchesLost</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col"><strong>Total Tons:</strong> @dashboard.TotalTons</div>
+        <div class="col"><strong>Total Maximums:</strong> @dashboard.TotalMaximums</div>
+        <div class="col"><strong>Man of the Match:</strong> @dashboard.ManOfTheMatchCount</div>
+    </div>
+    <StatsSummaryComponent Label="Recent Matches" Items="recentMatchItems" />
+}
+
+@code {
+    [Parameter] public int PlayerId { get; set; }
+    private PlayerDashboardDto? dashboard;
+
+    private List<string> recentMatchItems => dashboard?.RecentMatches
+        .Select(m => $"{m.Date:dd/MM/yy} vs {m.Opponent} [{m.MatchTypeName}]: {(m.Won ? "W" : "L")} | Tons: {m.Tons} | 180s: {m.Maximums}")
+        .ToList() ?? new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        dashboard = await Http.GetFromJsonAsync<PlayerDashboardDto>($"api/dashboard/player/{PlayerId}");
+    }
+}

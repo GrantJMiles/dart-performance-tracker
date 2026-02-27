@@ -1,0 +1,55 @@
+@page "/teams"
+@using DartPerformanceTracker.Shared.DTOs
+@inject HttpClient Http
+
+<h3>Teams</h3>
+
+@if (teams == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr><th>Id</th><th>Name</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var team in teams)
+            {
+                <tr><td>@team.Id</td><td>@team.Name</td></tr>
+            }
+        </tbody>
+    </table>
+}
+
+<h4>Add Team</h4>
+<EditForm Model="newTeam" OnValidSubmit="AddTeam">
+    <DataAnnotationsValidator />
+    <div class="mb-2">
+        <label>Name</label>
+        <InputText class="form-control" @bind-Value="newTeam.Name" />
+    </div>
+    <button type="submit" class="btn btn-primary">Add</button>
+</EditForm>
+
+@code {
+    private List<TeamDto>? teams;
+    private CreateTeamDto newTeam = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        teams = await Http.GetFromJsonAsync<List<TeamDto>>("api/teams");
+    }
+
+    private async Task AddTeam()
+    {
+        var response = await Http.PostAsJsonAsync("api/teams", newTeam);
+        if (response.IsSuccessStatusCode)
+        {
+            var created = await response.Content.ReadFromJsonAsync<TeamDto>();
+            teams?.Add(created!);
+            newTeam = new CreateTeamDto();
+        }
+    }
+}

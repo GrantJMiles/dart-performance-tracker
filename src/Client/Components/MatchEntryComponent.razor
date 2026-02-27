@@ -1,0 +1,60 @@
+@using DartPerformanceTracker.Shared.DTOs
+
+<div class="card mb-3">
+    <div class="card-header">
+        <MatchTypeRenderer MatchTypeName="@Config.MatchTypeName" PlayersPerSide="@Config.PlayersPerSide" /> - Match @MatchNumber
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col">
+                <label>Legs Won</label>
+                <input type="number" class="form-control" min="0" @bind="Match.LegsWon" />
+            </div>
+            <div class="col">
+                <label>Legs Lost</label>
+                <input type="number" class="form-control" min="0" @bind="Match.LegsLost" />
+            </div>
+            <div class="col d-flex align-items-end">
+                <div class="form-check">
+                    <InputCheckbox class="form-check-input" @bind-Value="Match.Won" id="@($"won_{Config.MatchTypeId}_{MatchNumber}")" />
+                    <label class="form-check-label">Won</label>
+                </div>
+            </div>
+        </div>
+        <div class="mt-2">
+            <label>Players (@Config.PlayersPerSide per side)</label>
+            <PlayerSelectorComponent Players="Players" SelectedPlayerIds="Match.PlayerIds" Label="Select Players" MaxSelections="Config.PlayersPerSide" />
+        </div>
+        <div class="mt-2">
+            <label>Player Stats</label>
+            @foreach (var playerId in Match.PlayerIds)
+            {
+                var stat = Match.PlayerStats.FirstOrDefault(s => s.PlayerId == playerId);
+                if (stat == null)
+                {
+                    stat = new CreatePlayerMatchStatsDto { PlayerId = playerId };
+                    Match.PlayerStats.Add(stat);
+                }
+                var playerName = Players.FirstOrDefault(p => p.Id == playerId)?.Name ?? playerId.ToString();
+                <div class="row mt-1">
+                    <div class="col-4"><strong>@playerName</strong></div>
+                    <div class="col">
+                        <label>Tons</label>
+                        <input type="number" class="form-control" min="0" @bind="stat.Tons" />
+                    </div>
+                    <div class="col">
+                        <label>180s</label>
+                        <input type="number" class="form-control" min="0" @bind="stat.Maximums" />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public SeasonMatchConfigurationDto Config { get; set; } = null!;
+    [Parameter, EditorRequired] public List<PlayerDto> Players { get; set; } = new();
+    [Parameter, EditorRequired] public CreateMatchDto Match { get; set; } = null!;
+    [Parameter] public int MatchNumber { get; set; } = 1;
+}

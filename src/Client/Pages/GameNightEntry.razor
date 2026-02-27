@@ -1,0 +1,113 @@
+@page "/gamenightentry"
+@using DartPerformanceTracker.Shared.DTOs
+@inject HttpClient Http
+
+<h3>Game Night Entry</h3>
+
+<div class="mb-2">
+    <label>Season</label>
+    <select class="form-control" @onchange="OnSeasonChanged">
+        <option value="0">-- Select Season --</option>
+        @foreach (var season in seasons)
+        {
+            <option value="@season.Id">@season.Name</option>
+        }
+    </select>
+</div>
+
+@if (selectedSeason != null)
+{
+    <div class="mb-2">
+        <label>Date</label>
+        <InputDate class="form-control" @bind-Value="model.Date" />
+    </div>
+    <div class="mb-2">
+        <label>Opponent</label>
+        <InputText class="form-control" @bind-Value="model.Opponent" />
+    </div>
+    <div class="mb-2">
+        <InputCheckbox @bind-Value="model.IsHome" /> Home Game
+    </div>
+
+    <h4>Matches</h4>
+    @foreach (var (config, index) in selectedSeason.MatchConfigurations.Select((c, i) => (c, i)))
+    {
+        for (int mi = 0; mi < config.NumberOfMatches; mi++)
+        {
+            var matchIndex = GetMatchIndex(index, mi);
+            <MatchEntryComponent
+                Config="config"
+                Players="players"
+                Match="model.Matches[matchIndex]"
+                MatchNumber="mi + 1" />
+        }
+    }
+
+    <h4>Man of the Match</h4>
+    <PlayerSelectorComponent Players="players" SelectedPlayerIds="model.ManOfTheMatchPlayerIds" Label="Man of the Match" />
+
+    <button class="btn btn-success mt-3" @onclick="Submit">Submit Game Night</button>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert alert-info mt-2">@message</div>
+    }
+}
+
+@code {
+    private List<SeasonDto> seasons = new();
+    private List<PlayerDto> players = new();
+    private SeasonDto? selectedSeason;
+    private CreateGameNightDto model = new() { Date = DateTime.Today };
+    private string message = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        seasons = await Http.GetFromJsonAsync<List<SeasonDto>>("api/seasons") ?? new();
+        players = await Http.GetFromJsonAsync<List<PlayerDto>>("api/players") ?? new();
+    }
+
+    private void OnSeasonChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id) && id > 0)
+        {
+            selectedSeason = seasons.FirstOrDefault(s => s.Id == id);
+            model.SeasonId = id;
+            model.Matches.Clear();
+            if (selectedSeason != null)
+            {
+                foreach (var config in selectedSeason.MatchConfigurations.OrderBy(c => c.OrderIndex))
+                {
+                    for (int i = 0; i < config.NumberOfMatches; i++)
+                    {
+                        model.Matches.Add(new CreateMatchDto { MatchTypeId = config.MatchTypeId });
+                    }
+                }
+            }
+        }
+    }
+
+    private int GetMatchIndex(int configIndex, int matchInConfig)
+    {
+        if (selectedSeason == null) return 0;
+        int offset = 0;
+        for (int i = 0; i < configIndex; i++)
+            offset += selectedSeason.MatchConfigurations[i].NumberOfMatches;
+        return offset + matchInConfig;
+    }
+
+    private async Task Submit()
+    {
+        var response = await Http.PostAsJsonAsync("api/gamenights", model);
+        if (response.IsSuccessStatusCode)
+        {
+            message = "Game night saved successfully!";
+            model = new CreateGameNightDto { Date = DateTime.Today };
+            selectedSeason = null;
+        }
+        else
+        {
+            message = "Error saving game night.";
+        }
+    }
+}

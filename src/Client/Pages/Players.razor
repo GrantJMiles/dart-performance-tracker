@@ -1,0 +1,75 @@
+@page "/players"
+@using DartPerformanceTracker.Shared.DTOs
+@inject HttpClient Http
+
+<h3>Players</h3>
+
+@if (players == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr><th>Id</th><th>Name</th><th>Team</th><th>Active</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var player in players)
+            {
+                <tr>
+                    <td>@player.Id</td>
+                    <td>@player.Name</td>
+                    <td>@player.TeamName</td>
+                    <td>@(player.IsActive ? "Yes" : "No")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<h4>Add Player</h4>
+<EditForm Model="newPlayer" OnValidSubmit="AddPlayer">
+    <DataAnnotationsValidator />
+    <div class="mb-2">
+        <label>Name</label>
+        <InputText class="form-control" @bind-Value="newPlayer.Name" />
+    </div>
+    <div class="mb-2">
+        <label>Team</label>
+        <InputSelect class="form-control" @bind-Value="newPlayer.TeamId">
+            <option value="0">-- Select Team --</option>
+            @foreach (var team in teams ?? new List<TeamDto>())
+            {
+                <option value="@team.Id">@team.Name</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="mb-2">
+        <InputCheckbox @bind-Value="newPlayer.IsActive" /> Active
+    </div>
+    <button type="submit" class="btn btn-primary">Add</button>
+</EditForm>
+
+@code {
+    private List<PlayerDto>? players;
+    private List<TeamDto>? teams;
+    private CreatePlayerDto newPlayer = new() { IsActive = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        players = await Http.GetFromJsonAsync<List<PlayerDto>>("api/players");
+        teams = await Http.GetFromJsonAsync<List<TeamDto>>("api/teams");
+    }
+
+    private async Task AddPlayer()
+    {
+        var response = await Http.PostAsJsonAsync("api/players", newPlayer);
+        if (response.IsSuccessStatusCode)
+        {
+            var created = await response.Content.ReadFromJsonAsync<PlayerDto>();
+            players?.Add(created!);
+            newPlayer = new CreatePlayerDto { IsActive = true };
+        }
+    }
+}

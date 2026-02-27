@@ -1,0 +1,12 @@
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/bin/Debug/net10.0/DartPerformanceTracker.Shared.deps.json
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/bin/Debug/net10.0/DartPerformanceTracker.Shared.dll
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/bin/Debug/net10.0/DartPerformanceTracker.Shared.pdb
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/obj/Debug/net10.0/DartPerformanceTracker.Shared.GeneratedMSBuildEditorConfig.editorconfig
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/obj/Debug/net10.0/DartPerformanceTracker.Shared.AssemblyInfoInputs.cache
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/obj/Debug/net10.0/DartPerformanceTracker.Shared.AssemblyInfo.cs
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/obj/Debug/net10.0/DartPerformanceTracker.Shared.csproj.CoreCompileInputs.cache
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/obj/Debug/net10.0/DartPerformanceTracker.Shared.sourcelink.json
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/obj/Debug/net10.0/DartPerformanceTracker.Shared.dll
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/obj/Debug/net10.0/refint/DartPerformanceTracker.Shared.dll
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/obj/Debug/net10.0/DartPerformanceTracker.Shared.pdb
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Shared/obj/Debug/net10.0/ref/DartPerformanceTracker.Shared.dll
