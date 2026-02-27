@@ -39,6 +39,13 @@ public class DashboardService : IDashboardService
             };
         }).ToList();
 
+        var orderedSummaries = summaries.OrderByDescending(s => s.Date).ToList();
+
+        var lastFiveForm = orderedSummaries
+            .Take(5)
+            .Select(s => s.MatchesWon == s.MatchesLost ? "D" : s.Won ? "W" : "L")
+            .ToList();
+
         return new TeamDashboardDto
         {
             SeasonId = seasonId,
@@ -50,7 +57,8 @@ public class DashboardService : IDashboardService
             TotalMatchesPlayed = gameNights.Sum(g => g.Matches.Count),
             TotalMatchesWon = gameNights.Sum(g => g.Matches.Count(m => m.Won)),
             TotalMatchesLost = gameNights.Sum(g => g.Matches.Count(m => !m.Won)),
-            GameNightSummaries = summaries.OrderByDescending(s => s.Date).ToList()
+            GameNightSummaries = orderedSummaries,
+            LastFiveForm = lastFiveForm
         };
     }
 
@@ -70,6 +78,41 @@ public class DashboardService : IDashboardService
             .ToListAsync();
 
         var motmCount = await _context.ManOfTheMatches.CountAsync(m => m.PlayerId == playerId);
+
+        // Top teammate: find the co-player who has shared the most matches, ordered by wins together
+        var matchIds = matchPlayers.Select(mp => mp.MatchId).ToHashSet();
+        var teammateStats = await _context.MatchPlayers
+            .Where(mp => matchIds.Contains(mp.MatchId) && mp.PlayerId != playerId)
+            .Select(mp => new { mp.PlayerId, mp.Player.Name, mp.Match.Won })
+            .ToListAsync();
+
+        TopTeammateDto? topTeammate = null;
+        if (teammateStats.Count > 0)
+        {
+            var grouped = teammateStats
+                .GroupBy(mp => mp.PlayerId)
+                .Select(g => new
+                {
+                    PlayerId = g.Key,
+                    PlayerName = g.First().Name,
+                    GamesPlayedTogether = g.Count(),
+                    WinsTogether = g.Count(mp => mp.Won)
+                })
+                .OrderByDescending(t => t.GamesPlayedTogether)
+                .ThenByDescending(t => t.WinsTogether)
+                .FirstOrDefault();
+
+            if (grouped != null)
+            {
+                topTeammate = new TopTeammateDto
+                {
+                    PlayerId = grouped.PlayerId,
+                    PlayerName = grouped.PlayerName,
+                    GamesPlayedTogether = grouped.GamesPlayedTogether,
+                    WinsTogether = grouped.WinsTogether
+                };
+            }
+        }
 
         var recentMatches = matchPlayers.Select(mp =>
         {
@@ -97,6 +140,7 @@ public class DashboardService : IDashboardService
             TotalTons = stats.Sum(s => s.Tons),
             TotalMaximums = stats.Sum(s => s.Maximums),
             ManOfTheMatchCount = motmCount,
+            TopTeammate = topTeammate,
             RecentMatches = recentMatches
         };
     }

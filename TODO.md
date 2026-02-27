@@ -61,8 +61,8 @@
 ## Core Queries
 - [x] Team record (games won / lost / drawn, legs won / lost)
 - [x] Last N game night results per season
-- [ ] Player top teammates query (most played with, ordered by wins)
-- [ ] "Last 5 form" strip on team dashboard
+- [x] Player top teammates query (most played with, ordered by wins)
+- [x] "Last 5 form" strip on team dashboard
 
 ## Client Pages
 - [x] `Teams.razor` — list teams, add team
@@ -83,7 +83,7 @@
 - [x] Win / loss record
 - [x] Total tons and maximums
 - [x] Man of the match count
-- [ ] Top teammate (name, games played together, wins together)
+- [x] Top teammate (name, games played together, wins together)
 
 ## Authentication
 - [ ] Phase 1 — optional passphrase middleware protecting POST endpoints

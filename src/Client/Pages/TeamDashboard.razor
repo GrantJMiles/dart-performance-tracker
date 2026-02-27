@@ -22,6 +22,18 @@ else
         <div class="col"><strong>Matches Won:</strong> @dashboard.TotalMatchesWon</div>
         <div class="col"><strong>Matches Lost:</strong> @dashboard.TotalMatchesLost</div>
     </div>
+    @if (dashboard.LastFiveForm.Count > 0)
+    {
+        <div class="row mb-3">
+            <div class="col">
+                <strong>Last @dashboard.LastFiveForm.Count Form:</strong>
+                @foreach (var result in dashboard.LastFiveForm)
+                {
+                    <span class="badge me-1 @(result == "W" ? "bg-success" : result == "L" ? "bg-danger" : "bg-secondary")">@result</span>
+                }
+            </div>
+        </div>
+    }
     <StatsSummaryComponent Label="Game Night Results" Items="gameNightItems" />
 }
 
