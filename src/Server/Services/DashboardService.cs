@@ -1,5 +1,6 @@
 using DartPerformanceTracker.Server.Data;
 using DartPerformanceTracker.Shared.DTOs;
+using DartPerformanceTracker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartPerformanceTracker.Server.Services;
@@ -23,6 +24,31 @@ public class DashboardService : IDashboardService
             .Where(g => g.SeasonId == seasonId)
             .ToListAsync();
 
+        return BuildDashboard(season.Name, seasonId, gameNights);
+    }
+
+    public async Task<TeamDashboardDto?> GetTeamDashboardAsync(int teamId, int seasonId)
+    {
+        var season = await _context.Seasons.FindAsync(seasonId);
+        if (season == null) return null;
+
+        // Only include game nights where at least one player from the team participated
+        var gameNightIds = await _context.MatchPlayers
+            .Where(mp => mp.Player.TeamId == teamId && mp.Match.GameNight.SeasonId == seasonId)
+            .Select(mp => mp.Match.GameNightId)
+            .Distinct()
+            .ToListAsync();
+
+        var gameNights = await _context.GameNights
+            .Include(g => g.Matches)
+            .Where(g => gameNightIds.Contains(g.Id))
+            .ToListAsync();
+
+        return BuildDashboard(season.Name, seasonId, gameNights);
+    }
+
+    private static TeamDashboardDto BuildDashboard(string seasonName, int seasonId, List<GameNight> gameNights)
+    {
         var summaries = gameNights.Select(g =>
         {
             var won = g.Matches.Count(m => m.Won);
@@ -49,7 +75,7 @@ public class DashboardService : IDashboardService
         return new TeamDashboardDto
         {
             SeasonId = seasonId,
-            SeasonName = season.Name,
+            SeasonName = seasonName,
             TotalGameNights = gameNights.Count,
             GameNightsWon = summaries.Count(s => s.Won),
             GameNightsLost = summaries.Count(s => !s.Won && s.MatchesWon != s.MatchesLost),

@@ -1,0 +1,273 @@
+@page "/config"
+
+<PageTitle>Configuration – Dart Tracker</PageTitle>
+
+<div class="config-page">
+    <h1 class="page-title">
+        <i class="bi bi-gear-fill me-2"></i>Configuration
+    </h1>
+
+    <ul class="nav nav-tabs mb-0">
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "seasons" ? "active" : "")" @onclick='() => SetTab("seasons")'>
+                <i class="bi bi-calendar3 me-1"></i>Seasons
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "teams" ? "active" : "")" @onclick='() => SetTab("teams")'>
+                <i class="bi bi-people-fill me-1"></i>Teams
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "players" ? "active" : "")" @onclick='() => SetTab("players")'>
+                <i class="bi bi-person-fill me-1"></i>Players
+            </button>
+        </li>
+    </ul>
+
+    <div class="config-section">
+
+        @if (activeTab == "seasons")
+        {
+            <p class="section-title">Seasons</p>
+
+            @if (seasons == null)
+            {
+                <p class="text-muted">Loading...</p>
+            }
+            else if (seasons.Any())
+            {
+                <table class="config-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Start</th>
+                            <th>End</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var season in seasons)
+                        {
+                            <tr>
+                                <td><strong>@season.Name</strong></td>
+                                <td>@season.StartDate.ToShortDateString()</td>
+                                <td>@season.EndDate.ToShortDateString()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted small">No seasons yet. Add one below.</p>
+            }
+
+            <hr class="my-3" />
+            <p class="section-title">Add Season</p>
+            <EditForm Model="newSeason" OnValidSubmit="AddSeason">
+                <DataAnnotationsValidator />
+                <div class="config-form-row">
+                    <div>
+                        <label class="form-label">Name</label>
+                        <InputText class="form-control" @bind-Value="newSeason.Name" placeholder="e.g. 2025/26" />
+                    </div>
+                    <div>
+                        <label class="form-label">Start Date</label>
+                        <InputDate class="form-control" @bind-Value="newSeason.StartDate" />
+                    </div>
+                    <div>
+                        <label class="form-label">End Date</label>
+                        <InputDate class="form-control" @bind-Value="newSeason.EndDate" />
+                    </div>
+                    <div class="d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Add Season</button>
+                    </div>
+                </div>
+            </EditForm>
+        }
+
+        else if (activeTab == "teams")
+        {
+            <p class="section-title">Teams</p>
+
+            @if (teams == null)
+            {
+                <p class="text-muted">Loading...</p>
+            }
+            else if (teams.Any())
+            {
+                <table class="config-table">
+                    <thead>
+                        <tr><th>Name</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var team in teams)
+                        {
+                            <tr><td><strong>@team.Name</strong></td></tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted small">No teams yet. Add one below.</p>
+            }
+
+            <hr class="my-3" />
+            <p class="section-title">Add Team</p>
+            <EditForm Model="newTeam" OnValidSubmit="AddTeam">
+                <DataAnnotationsValidator />
+                <div class="config-form-row">
+                    <div>
+                        <label class="form-label">Name</label>
+                        <InputText class="form-control" @bind-Value="newTeam.Name" placeholder="e.g. The Arrows" />
+                    </div>
+                    <div class="d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Add Team</button>
+                    </div>
+                </div>
+            </EditForm>
+        }
+
+        else if (activeTab == "players")
+        {
+            <p class="section-title">Players</p>
+
+            @if (players == null)
+            {
+                <p class="text-muted">Loading...</p>
+            }
+            else if (players.Any())
+            {
+                <table class="config-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Team</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var player in players)
+                        {
+                            <tr>
+                                <td><strong>@player.Name</strong></td>
+                                <td>@player.TeamName</td>
+                                <td>
+                                    @if (player.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted small">No players yet. Add one below.</p>
+            }
+
+            <hr class="my-3" />
+            <p class="section-title">Add Player</p>
+            <EditForm Model="newPlayer" OnValidSubmit="AddPlayer">
+                <DataAnnotationsValidator />
+                <div class="config-form-row">
+                    <div>
+                        <label class="form-label">Name</label>
+                        <InputText class="form-control" @bind-Value="newPlayer.Name" placeholder="Player name" />
+                    </div>
+                    <div>
+                        <label class="form-label">Team</label>
+                        <InputSelect class="form-control" @bind-Value="newPlayer.TeamId">
+                            <option value="0">-- Select Team --</option>
+                            @foreach (var team in teams ?? new List<TeamDto>())
+                            {
+                                <option value="@team.Id">@team.Name</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="d-flex align-items-center gap-2" style="padding-top: 1.5rem;">
+                        <InputCheckbox class="form-check-input mt-0" @bind-Value="newPlayer.IsActive" id="playerActive" />
+                        <label class="form-check-label" for="playerActive">Active</label>
+                    </div>
+                    <div class="d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Add Player</button>
+                    </div>
+                </div>
+            </EditForm>
+        }
+
+    </div>
+</div>
+
+@code {
+    private string activeTab = "seasons";
+
+    private List<SeasonDto>? seasons;
+    private List<TeamDto>? teams;
+    private List<PlayerDto>? players;
+
+    private CreateSeasonDto newSeason = new() { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(6) };
+    private CreateTeamDto newTeam = new();
+    private CreatePlayerDto newPlayer = new() { IsActive = true };
+
+    [Inject] private HttpClient Http { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.WhenAll(LoadSeasons(), LoadTeams(), LoadPlayers());
+    }
+
+    private void SetTab(string tab)
+    {
+        activeTab = tab;
+    }
+
+    private async Task LoadSeasons() =>
+        seasons = await Http.GetFromJsonAsync<List<SeasonDto>>("api/seasons");
+
+    private async Task LoadTeams() =>
+        teams = await Http.GetFromJsonAsync<List<TeamDto>>("api/teams");
+
+    private async Task LoadPlayers() =>
+        players = await Http.GetFromJsonAsync<List<PlayerDto>>("api/players");
+
+    private async Task AddSeason()
+    {
+        var response = await Http.PostAsJsonAsync("api/seasons", newSeason);
+        if (response.IsSuccessStatusCode)
+        {
+            var created = await response.Content.ReadFromJsonAsync<SeasonDto>();
+            seasons?.Add(created!);
+            newSeason = new CreateSeasonDto { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(6) };
+        }
+    }
+
+    private async Task AddTeam()
+    {
+        var response = await Http.PostAsJsonAsync("api/teams", newTeam);
+        if (response.IsSuccessStatusCode)
+        {
+            var created = await response.Content.ReadFromJsonAsync<TeamDto>();
+            teams?.Add(created!);
+            newTeam = new CreateTeamDto();
+        }
+    }
+
+    private async Task AddPlayer()
+    {
+        var response = await Http.PostAsJsonAsync("api/players", newPlayer);
+        if (response.IsSuccessStatusCode)
+        {
+            var created = await response.Content.ReadFromJsonAsync<PlayerDto>();
+            players?.Add(created!);
+            newPlayer = new CreatePlayerDto { IsActive = true };
+        }
+    }
+}

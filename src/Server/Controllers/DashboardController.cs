@@ -22,6 +22,13 @@ public class DashboardController : ControllerBase
         return result == null ? NotFound() : Ok(result);
     }
 
+    [HttpGet("team/{teamId}/season/{seasonId}")]
+    public async Task<ActionResult<TeamDashboardDto>> GetTeamSeasonDashboard(int teamId, int seasonId)
+    {
+        var result = await _dashboardService.GetTeamDashboardAsync(teamId, seasonId);
+        return result == null ? NotFound() : Ok(result);
+    }
+
     [HttpGet("player/{playerId}")]
     public async Task<ActionResult<PlayerDashboardDto>> GetPlayerDashboard(int playerId)
     {

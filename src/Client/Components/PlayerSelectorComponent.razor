@@ -2,17 +2,18 @@
 
 <div>
     <label class="form-label">@Label</label>
-    <div>
+    <div class="player-checkboxes">
         @foreach (var player in Players.Where(p => p.IsActive))
         {
             var isSelected = SelectedPlayerIds.Contains(player.Id);
+            var isDisabled = !isSelected && MaxSelections > 0 && SelectedPlayerIds.Count >= MaxSelections;
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox"
-                       id="player_@player.Id"
+                       id="@($"{Prefix}_player_{player.Id}")"
                        checked="@isSelected"
-                       disabled="@(!isSelected && MaxSelections > 0 && SelectedPlayerIds.Count >= MaxSelections)"
+                       disabled="@isDisabled"
                        @onchange="e => TogglePlayer(player.Id, (bool)e.Value!)" />
-                <label class="form-check-label" for="player_@player.Id">@player.Name</label>
+                <label class="form-check-label" for="@($"{Prefix}_player_{player.Id}")">@player.Name</label>
             </div>
         }
     </div>
@@ -21,10 +22,12 @@
 @code {
     [Parameter, EditorRequired] public List<PlayerDto> Players { get; set; } = new();
     [Parameter, EditorRequired] public List<int> SelectedPlayerIds { get; set; } = new();
+    [Parameter] public EventCallback<List<int>> SelectedPlayerIdsChanged { get; set; }
     [Parameter] public string Label { get; set; } = "Select Players";
     [Parameter] public int MaxSelections { get; set; } = 0;
+    [Parameter] public string Prefix { get; set; } = "sel";
 
-    private void TogglePlayer(int playerId, bool selected)
+    private async Task TogglePlayer(int playerId, bool selected)
     {
         if (selected)
         {
@@ -35,5 +38,6 @@
         {
             SelectedPlayerIds.Remove(playerId);
         }
+        await SelectedPlayerIdsChanged.InvokeAsync(SelectedPlayerIds);
     }
 }

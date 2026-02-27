@@ -1,0 +1,64 @@
+<ApexChart TItem="GameNightSummaryDto"
+           Title="Recent Form"
+           Options="@options"
+           Height="260">
+
+    <ApexPointSeries TItem="GameNightSummaryDto"
+                     Items="@Items"
+                     Name="Matches Won"
+                     SeriesType="SeriesType.Bar"
+                     XValue="@(e => e.Date.ToString("dd MMM"))"
+                     YValue="@(e => (decimal)e.MatchesWon)" />
+
+    <ApexPointSeries TItem="GameNightSummaryDto"
+                     Items="@Items"
+                     Name="Matches Lost"
+                     SeriesType="SeriesType.Bar"
+                     XValue="@(e => e.Date.ToString("dd MMM"))"
+                     YValue="@(e => (decimal)e.MatchesLost)" />
+
+</ApexChart>
+
+@code {
+    [Parameter, EditorRequired] public List<GameNightSummaryDto> Items { get; set; } = new();
+
+    private ApexChartOptions<GameNightSummaryDto> options = new()
+    {
+        Chart = new Chart
+        {
+            Stacked = true,
+            Toolbar = new Toolbar { Show = false },
+            Background = "transparent"
+        },
+        Colors = new List<string> { "#10b981", "#ef4444" },
+        Legend = new Legend { Position = LegendPosition.Top },
+        PlotOptions = new PlotOptions
+        {
+            Bar = new PlotOptionsBar
+            {
+                BorderRadius = 4,
+                ColumnWidth = "55%"
+            }
+        },
+        Xaxis = new XAxis
+        {
+            Labels = new XAxisLabels
+            {
+                Style = new AxisLabelStyle { FontFamily = "inherit", FontSize = "12px" }
+            }
+        },
+        Yaxis = new List<YAxis>
+        {
+            new YAxis
+            {
+                Min = 0,
+                ForceNiceScale = true,
+                Labels = new YAxisLabels
+                {
+                    Style = new AxisLabelStyle { FontFamily = "inherit", FontSize = "12px" }
+                }
+            }
+        },
+        Theme = new Theme { Mode = Mode.Light }
+    };
+}

@@ -1,7 +1,178 @@
-﻿@page "/"
+@page "/"
+@inject HttpClient Http
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dart Tracker</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Dashboard</h1>
+        <div class="dashboard-selectors">
+            @if (teams != null && teams.Any())
+            {
+                <select class="form-select form-select-sm" value="@selectedTeamId" @onchange="OnTeamChanged">
+                    @foreach (var t in teams)
+                    {
+                        <option value="@t.Id">@t.Name</option>
+                    }
+                </select>
+            }
+            @if (seasons != null && seasons.Any())
+            {
+                <select class="form-select form-select-sm" value="@selectedSeasonId" @onchange="OnSeasonChanged">
+                    @foreach (var s in seasons)
+                    {
+                        <option value="@s.Id">@s.Name</option>
+                    }
+                </select>
+            }
+        </div>
+    </div>
 
-Welcome to your new app.
+    @if (loading)
+    {
+        <div class="loading-state">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <span>Loading...</span>
+        </div>
+    }
+    else if (teams == null || !teams.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">&#x1F3AF;</div>
+            <h3>Welcome to Dart Tracker</h3>
+            <p class="text-muted">Get started by adding a season, your team, and players in settings.</p>
+            <a href="/config" class="btn-accent"><i class="bi bi-gear-fill me-1"></i>Open Settings</a>
+        </div>
+    }
+    else if (seasons == null || !seasons.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">&#x1F4C5;</div>
+            <h3>No seasons yet</h3>
+            <p class="text-muted">Add a season in settings to start tracking results.</p>
+            <a href="/config" class="btn-accent"><i class="bi bi-gear-fill me-1"></i>Open Settings</a>
+        </div>
+    }
+    else if (dashboard == null || dashboard.TotalGameNights == 0)
+    {
+        <div class="empty-state">
+            <div class="empty-icon">&#x1F3AF;</div>
+            <h3>No game nights yet</h3>
+            <p class="text-muted">Record your first match night to start tracking results.</p>
+            <a href="/matchday" class="btn-accent"><i class="bi bi-file-earmark-text-fill me-1"></i>Enter Match Night</a>
+        </div>
+    }
+    else
+    {
+        <div class="stat-cards">
+            <div class="stat-card">
+                <span class="stat-value">@dashboard.TotalGameNights</span>
+                <span class="stat-label">Played</span>
+            </div>
+            <div class="stat-card won">
+                <span class="stat-value">@dashboard.GameNightsWon</span>
+                <span class="stat-label">Won</span>
+            </div>
+            <div class="stat-card lost">
+                <span class="stat-value">@dashboard.GameNightsLost</span>
+                <span class="stat-label">Lost</span>
+            </div>
+            <div class="stat-card drawn">
+                <span class="stat-value">@dashboard.GameNightsDrawn</span>
+                <span class="stat-label">Drawn</span>
+            </div>
+        </div>
+
+        @if (recentNights.Any())
+        {
+            <div class="chart-card">
+                <p class="section-title">Recent Form</p>
+                <FormChartComponent Items="recentNights" />
+            </div>
+        }
+
+        @if (dashboard.GameNightSummaries.Any())
+        {
+            <div class="results-card">
+                <p class="section-title">Game Nights</p>
+                <div class="results-list">
+                    @foreach (var night in dashboard.GameNightSummaries.OrderByDescending(g => g.Date))
+                    {
+                        var isWon = night.Won;
+                        var isDrawn = !night.Won && night.MatchesWon == night.MatchesLost;
+                        <div class="result-row">
+                            <span class="result-date">@night.Date.ToString("dd MMM")</span>
+                            <span class="result-opponent">vs @night.Opponent @(night.IsHome ? "&#x1F3E0;" : "&#x2708;&#xFE0F;")</span>
+                            <span class="result-score">@night.MatchesWon&#x2013;@night.MatchesLost</span>
+                            <span class="result-badge @(isWon ? "badge-won" : isDrawn ? "badge-drawn" : "badge-lost")">
+                                @(isWon ? "W" : isDrawn ? "D" : "L")
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<TeamDto>? teams;
+    private List<SeasonDto>? seasons;
+    private int selectedTeamId;
+    private int selectedSeasonId;
+    private TeamDashboardDto? dashboard;
+    private bool loading = true;
+
+    private List<GameNightSummaryDto> recentNights =>
+        dashboard?.GameNightSummaries
+            .OrderBy(g => g.Date)
+            .TakeLast(6)
+            .ToList() ?? new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var teamsTask = Http.GetFromJsonAsync<List<TeamDto>>("api/teams");
+        var seasonsTask = Http.GetFromJsonAsync<List<SeasonDto>>("api/seasons");
+        await Task.WhenAll(teamsTask, seasonsTask);
+
+        teams = teamsTask.Result;
+        seasons = seasonsTask.Result;
+
+        if (teams != null && teams.Any())
+            selectedTeamId = teams.First().Id;
+
+        if (seasons != null && seasons.Any())
+            selectedSeasonId = seasons.Last().Id;
+
+        await LoadDashboard();
+    }
+
+    private async Task OnTeamChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id) && id > 0)
+        {
+            selectedTeamId = id;
+            await LoadDashboard();
+        }
+    }
+
+    private async Task OnSeasonChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id) && id > 0)
+        {
+            selectedSeasonId = id;
+            await LoadDashboard();
+        }
+    }
+
+    private async Task LoadDashboard()
+    {
+        loading = true;
+        dashboard = null;
+        StateHasChanged();
+        if (selectedTeamId > 0 && selectedSeasonId > 0)
+            dashboard = await Http.GetFromJsonAsync<TeamDashboardDto>(
+                $"api/dashboard/team/{selectedTeamId}/season/{selectedSeasonId}");
+        loading = false;
+    }
+}

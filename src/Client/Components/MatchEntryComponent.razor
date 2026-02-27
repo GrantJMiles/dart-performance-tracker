@@ -23,32 +23,35 @@
         </div>
         <div class="mt-2">
             <label>Players (@Config.PlayersPerSide per side)</label>
-            <PlayerSelectorComponent Players="Players" SelectedPlayerIds="Match.PlayerIds" Label="Select Players" MaxSelections="Config.PlayersPerSide" />
+            <PlayerSelectorComponent
+                Players="Players"
+                SelectedPlayerIds="Match.PlayerIds"
+                SelectedPlayerIdsChanged="OnPlayerIdsChanged"
+                Prefix="@($"match_{Config.MatchTypeId}_{MatchNumber}")"
+                Label="Select Players"
+                MaxSelections="Config.PlayersPerSide" />
         </div>
-        <div class="mt-2">
-            <label>Player Stats</label>
-            @foreach (var playerId in Match.PlayerIds)
-            {
-                var stat = Match.PlayerStats.FirstOrDefault(s => s.PlayerId == playerId);
-                if (stat == null)
+        @if (Match.PlayerStats.Any())
+        {
+            <div class="mt-2">
+                <label>Player Stats</label>
+                @foreach (var stat in Match.PlayerStats)
                 {
-                    stat = new CreatePlayerMatchStatsDto { PlayerId = playerId };
-                    Match.PlayerStats.Add(stat);
+                    var playerName = Players.FirstOrDefault(p => p.Id == stat.PlayerId)?.Name ?? stat.PlayerId.ToString();
+                    <div class="row mt-1">
+                        <div class="col-4"><strong>@playerName</strong></div>
+                        <div class="col">
+                            <label>Tons</label>
+                            <input type="number" class="form-control" min="0" @bind="stat.Tons" />
+                        </div>
+                        <div class="col">
+                            <label>180s</label>
+                            <input type="number" class="form-control" min="0" @bind="stat.Maximums" />
+                        </div>
+                    </div>
                 }
-                var playerName = Players.FirstOrDefault(p => p.Id == playerId)?.Name ?? playerId.ToString();
-                <div class="row mt-1">
-                    <div class="col-4"><strong>@playerName</strong></div>
-                    <div class="col">
-                        <label>Tons</label>
-                        <input type="number" class="form-control" min="0" @bind="stat.Tons" />
-                    </div>
-                    <div class="col">
-                        <label>180s</label>
-                        <input type="number" class="form-control" min="0" @bind="stat.Maximums" />
-                    </div>
-                </div>
-            }
-        </div>
+            </div>
+        }
     </div>
 </div>
 
@@ -57,4 +60,14 @@
     [Parameter, EditorRequired] public List<PlayerDto> Players { get; set; } = new();
     [Parameter, EditorRequired] public CreateMatchDto Match { get; set; } = null!;
     [Parameter] public int MatchNumber { get; set; } = 1;
+
+    private void OnPlayerIdsChanged(List<int> updatedIds)
+    {
+        // Remove stats for players that were deselected
+        Match.PlayerStats.RemoveAll(s => !updatedIds.Contains(s.PlayerId));
+        // Add stats for newly selected players
+        foreach (var id in updatedIds.Where(id => !Match.PlayerStats.Any(s => s.PlayerId == id)))
+            Match.PlayerStats.Add(new CreatePlayerMatchStatsDto { PlayerId = id });
+        StateHasChanged();
+    }
 }

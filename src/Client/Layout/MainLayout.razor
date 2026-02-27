@@ -1,16 +1,20 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+
+<header class="app-header">
+    <NavLink href="/" class="brand" Match="NavLinkMatch.All">
+        <span class="brand-icon">🎯</span>
+        <span class="brand-name">Dart Tracker</span>
+    </NavLink>
+    <div class="header-actions">
+        <NavLink href="/matchday" class="icon-btn" title="Match Day Entry">
+            <i class="bi bi-file-earmark-text-fill"></i>
+        </NavLink>
+        <NavLink href="/config" class="icon-btn" title="Settings">
+            <i class="bi bi-gear-fill"></i>
+        </NavLink>
     </div>
+</header>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+<main class="app-main">
+    @Body
+</main>
