@@ -5,7 +5,7 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
   "mainAssemblyName": "DartPerformanceTracker.Client",
   "applicationEnvironment": "Development",
   "resources": {
-    "hash": "sha256-7Dylu9rs0mxcpyL1cZHA6typrrFmk46iiLhfYff+Jdw=",
+    "hash": "sha256-YkqJZ92ZhIRk6iaBfgmd+Owasb8AHJbIyQ5LmHW1roo=",
     "jsModuleNative": [
       {
         "name": "dotnet.native.87vtjjdetb.js"
@@ -1242,28 +1242,28 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
       },
       {
         "virtualPath": "DartPerformanceTracker.Shared.wasm",
-        "name": "DartPerformanceTracker.Shared.rn5x8ly61s.wasm",
-        "integrity": "sha256-GUlVV1GWO3/ovEnzQooO4cGhDKmh8CKwPGDP//oaqBY=",
+        "name": "DartPerformanceTracker.Shared.i5oqa00uc3.wasm",
+        "integrity": "sha256-OjkJL4PB3p+pC9ZAfAala+LdFlX8he5kMANyZUik4tw=",
         "cache": "force-cache"
       },
       {
         "virtualPath": "DartPerformanceTracker.Client.wasm",
-        "name": "DartPerformanceTracker.Client.hi97gk7xgb.wasm",
-        "integrity": "sha256-6bs/IBHcM8t/WylLR2HUVDa7wwqKk95LzG8Y8PedANw=",
+        "name": "DartPerformanceTracker.Client.g9ablehrqt.wasm",
+        "integrity": "sha256-TPrpZkVZ+cisYjZ3X/3AmmjzlVzXV++LgyI7ot6Ib0U=",
         "cache": "force-cache"
       }
     ],
     "pdb": [
       {
         "virtualPath": "DartPerformanceTracker.Shared.pdb",
-        "name": "DartPerformanceTracker.Shared.31brl5b8pg.pdb",
-        "integrity": "sha256-l4mjv0Gl1a4H9V8Tvr5rvthSIVDIGsjnH+t+l9d5rB4=",
+        "name": "DartPerformanceTracker.Shared.vulm049omo.pdb",
+        "integrity": "sha256-Jzg+q9oVka5LJbgvpI0U6Yk0vDoLCVNF2OeOURpbrRI=",
         "cache": "force-cache"
       },
       {
         "virtualPath": "DartPerformanceTracker.Client.pdb",
-        "name": "DartPerformanceTracker.Client.67d0719m8z.pdb",
-        "integrity": "sha256-LqIM6KZ3wG3c0qotPWABUaBGFx1noHlmPVvEGkusg5w=",
+        "name": "DartPerformanceTracker.Client.dtc3584x09.pdb",
+        "integrity": "sha256-X9cB+fU38LegfoBbpIvhj3JmfgPEdXLo5mTSbZLN+iQ=",
         "cache": "force-cache"
       }
     ],

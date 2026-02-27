@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DartPerformanceTracker.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a89fe8e2ab19781170a2b38d95ed4e1c7b6c6521")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9d4519fb947f3b822b68d5a01d44fecaffdcf56d")]
 [assembly: System.Reflection.AssemblyProductAttribute("DartPerformanceTracker.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DartPerformanceTracker.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

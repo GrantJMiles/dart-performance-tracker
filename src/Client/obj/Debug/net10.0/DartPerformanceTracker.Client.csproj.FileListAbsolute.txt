@@ -9,10 +9,6 @@
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/DartPerformanceTracker.Client.MvcApplicationPartsAssemblyInfo.cache
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/DartPerformanceTracker.Client.sourcelink.json
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/DartPerformanceTracker.Client.runtimeconfig.json
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Client.67d0719m8z.pdb
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Client.hi97gk7xgb.wasm
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Shared.31brl5b8pg.pdb
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Shared.rn5x8ly61s.wasm
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/Microsoft.AspNetCore.Authorization.1l4onz0xjo.wasm
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/Microsoft.AspNetCore.Components.Forms.ij454jqrom.wasm
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/Microsoft.AspNetCore.Components.Web.nctswpx09d.wasm
@@ -211,7 +207,6 @@
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.cc45vjr1b8.wasm
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/WindowsBase.x4p87bcsuc.wasm
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/blazor.webassembly.66stpp682q.js
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/dotnet.5po17zcwud.js
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/dotnet.js.map
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/dotnet.native.87vtjjdetb.js
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/dotnet.native.befq3iek54.wasm
@@ -277,7 +272,6 @@
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Buffers.pd2t0nt2si.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Net.HttpListener.jh2jtmhvqc.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Reflection.c2pcqiz4om.wasm.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Shared.rn5x8ly61s.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Text.Encoding.CodePages.ymxaolsyg1.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Linq.AsyncEnumerable.tvr5elqhf3.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/dotnet.js.map.gz
@@ -286,11 +280,9 @@
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/Microsoft.Extensions.Configuration.orhptnd9xx.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/Microsoft.VisualBasic.Core.0gp3r8s9ux.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Runtime.Loader.ksfzm5bevd.wasm.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/dotnet.5po17zcwud.js.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Drawing.5s8pq7f6mj.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Runtime.Numerics.x46mnj191d.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Reflection.Emit.Lightweight.sg5289qtzr.wasm.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Shared.31brl5b8pg.pdb.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Security.Principal.9yf50wt6yq.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/Microsoft.JSInterop.x028qg75kb.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/Microsoft.Extensions.Configuration.Json.bv467jqp58.wasm.gz
@@ -400,7 +392,6 @@
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Reflection.Extensions.s1ni2bi7uo.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Net.Ping.wnrh6t4f3i.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.IO.Pipelines.9nkvrm3ay5.wasm.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Client.hi97gk7xgb.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/Microsoft.CSharp.3bqyx3jy31.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Text.RegularExpressions.9szr8dh603.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.ComponentModel.ul68gvf84n.wasm.gz
@@ -414,7 +405,6 @@
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Collections.8ve53xakwt.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Transactions.444brye6a0.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Text.Encoding.0tkk88r043.wasm.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Client.67d0719m8z.pdb.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.IO.FileSystem.Watcher.g3q08a5r0l.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Numerics.5fwkk0fu07.wasm.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/System.Xml.XmlDocument.3z9ye8hrig.wasm.gz
@@ -1118,12 +1108,6 @@
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/ggtn9fq5g5-{0}-tjcz0u77k5-tjcz0u77k5.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/elmml0u5ei-{0}-tptq2av103-tptq2av103.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/3y1dypzf7d-{0}-lfu7j35m59-lfu7j35m59.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/83s9of2tzd-{0}-rn5x8ly61s-rn5x8ly61s.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/b2pg0sb4ws-{0}-31brl5b8pg-31brl5b8pg.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/v4beujluxf-{0}-hi97gk7xgb-hi97gk7xgb.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/x583yn19vf-{0}-67d0719m8z-67d0719m8z.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/af1z8aqv15-{0}-5po17zcwud-5po17zcwud.gz
-/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/uq3gaarlt5-{0}-owum9yajlu-owum9yajlu.gz
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/staticwebassets.build.json
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/staticwebassets.build.json.cache
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/staticwebassets.development.json
@@ -1134,3 +1118,19 @@
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/refint/DartPerformanceTracker.Client.dll
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/DartPerformanceTracker.Client.pdb
 /home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/ref/DartPerformanceTracker.Client.dll
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Client.dtc3584x09.pdb
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Client.g9ablehrqt.wasm
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Shared.i5oqa00uc3.wasm
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Shared.vulm049omo.pdb
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/dotnet.lj5hsl639v.js
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Shared.i5oqa00uc3.wasm.gz
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/dotnet.lj5hsl639v.js.gz
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Shared.vulm049omo.pdb.gz
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Client.g9ablehrqt.wasm.gz
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/bin/Debug/net10.0/wwwroot/_framework/DartPerformanceTracker.Client.dtc3584x09.pdb.gz
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/83s9of2tzd-{0}-i5oqa00uc3-i5oqa00uc3.gz
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/b2pg0sb4ws-{0}-vulm049omo-vulm049omo.gz
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/v4beujluxf-{0}-g9ablehrqt-g9ablehrqt.gz
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/x583yn19vf-{0}-dtc3584x09-dtc3584x09.gz
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/af1z8aqv15-{0}-lj5hsl639v-lj5hsl639v.gz
+/home/runner/work/dart-performance-tracker/dart-performance-tracker/src/Client/obj/Debug/net10.0/compressed/uq3gaarlt5-{0}-g5vsdvob5q-g5vsdvob5q.gz

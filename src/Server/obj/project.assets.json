@@ -568,6 +568,22 @@
           }
         }
       },
+      "Scalar.AspNetCore/2.12.49": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/Scalar.AspNetCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Scalar.AspNetCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
       "SQLitePCLRaw.bundle_e_sqlite3/2.1.11": {
         "type": "package",
         "dependencies": {
@@ -2223,6 +2239,25 @@
         "packageIcon.png"
       ]
     },
+    "Scalar.AspNetCore/2.12.49": {
+      "sha512": "uh22g/c03bNbuu0DRIR8pIGAfZlRpi5QDDi7y6DS7F+OzMowoJ9mZfHsb2Z59hUO1ATjwtCmauzjlAFGSMZ4Tg==",
+      "type": "package",
+      "path": "scalar.aspnetcore/2.12.49",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net10.0/Scalar.AspNetCore.dll",
+        "lib/net10.0/Scalar.AspNetCore.xml",
+        "lib/net8.0/Scalar.AspNetCore.dll",
+        "lib/net8.0/Scalar.AspNetCore.xml",
+        "lib/net9.0/Scalar.AspNetCore.dll",
+        "lib/net9.0/Scalar.AspNetCore.xml",
+        "scalar.aspnetcore.2.12.49.nupkg.sha512",
+        "scalar.aspnetcore.nuspec"
+      ]
+    },
     "SQLitePCLRaw.bundle_e_sqlite3/2.1.11": {
       "sha512": "DC4nA7yWnf4UZdgJDF+9Mus4/cb0Y3Sfgi3gDnAoKNAIBwzkskNAbNbyu+u4atT0ruVlZNJfwZmwiEwE5oz9LQ==",
       "type": "package",
@@ -2515,7 +2550,8 @@
       "Microsoft.AspNetCore.OpenApi >= 10.0.2",
       "Microsoft.EntityFrameworkCore.Design >= 10.0.3",
       "Microsoft.EntityFrameworkCore.Sqlite >= 10.0.3",
-      "Microsoft.EntityFrameworkCore.Tools >= 10.0.3"
+      "Microsoft.EntityFrameworkCore.Tools >= 10.0.3",
+      "Scalar.AspNetCore >= 2.12.49"
     ]
   },
   "packageFolders": {
@@ -2584,6 +2620,10 @@
             "suppressParent": "All",
             "target": "Package",
             "version": "[10.0.3, )"
+          },
+          "Scalar.AspNetCore": {
+            "target": "Package",
+            "version": "[2.12.49, )"
           }
         },
         "imports": [
