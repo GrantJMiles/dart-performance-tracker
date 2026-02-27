@@ -1,0 +1,9 @@
+@using DartPerformanceTracker.Shared.DTOs
+
+<span class="badge bg-primary me-1">@MatchTypeName</span>
+<span class="text-muted small">(@PlayersPerSide v @PlayersPerSide)</span>
+
+@code {
+    [Parameter, EditorRequired] public string MatchTypeName { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public int PlayersPerSide { get; set; }
+}

@@ -1,0 +1,39 @@
+@using DartPerformanceTracker.Shared.DTOs
+
+<div>
+    <label class="form-label">@Label</label>
+    <div>
+        @foreach (var player in Players.Where(p => p.IsActive))
+        {
+            var isSelected = SelectedPlayerIds.Contains(player.Id);
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox"
+                       id="player_@player.Id"
+                       checked="@isSelected"
+                       disabled="@(!isSelected && MaxSelections > 0 && SelectedPlayerIds.Count >= MaxSelections)"
+                       @onchange="e => TogglePlayer(player.Id, (bool)e.Value!)" />
+                <label class="form-check-label" for="player_@player.Id">@player.Name</label>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public List<PlayerDto> Players { get; set; } = new();
+    [Parameter, EditorRequired] public List<int> SelectedPlayerIds { get; set; } = new();
+    [Parameter] public string Label { get; set; } = "Select Players";
+    [Parameter] public int MaxSelections { get; set; } = 0;
+
+    private void TogglePlayer(int playerId, bool selected)
+    {
+        if (selected)
+        {
+            if (!SelectedPlayerIds.Contains(playerId))
+                SelectedPlayerIds.Add(playerId);
+        }
+        else
+        {
+            SelectedPlayerIds.Remove(playerId);
+        }
+    }
+}
