@@ -12,6 +12,7 @@ public class TeamDashboardDto
     public int TotalMatchesWon { get; set; }
     public int TotalMatchesLost { get; set; }
     public List<GameNightSummaryDto> GameNightSummaries { get; set; } = new();
+    public List<string> LastFiveForm { get; set; } = new();
 }
 
 public class GameNightSummaryDto
@@ -36,7 +37,16 @@ public class PlayerDashboardDto
     public int TotalTons { get; set; }
     public int TotalMaximums { get; set; }
     public int ManOfTheMatchCount { get; set; }
+    public TopTeammateDto? TopTeammate { get; set; }
     public List<PlayerMatchResultDto> RecentMatches { get; set; } = new();
+}
+
+public class TopTeammateDto
+{
+    public int PlayerId { get; set; }
+    public string PlayerName { get; set; } = string.Empty;
+    public int GamesPlayedTogether { get; set; }
+    public int WinsTogether { get; set; }
 }
 
 public class PlayerMatchResultDto

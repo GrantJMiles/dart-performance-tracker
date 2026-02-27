@@ -21,6 +21,15 @@ else
         <div class="col"><strong>Total Maximums:</strong> @dashboard.TotalMaximums</div>
         <div class="col"><strong>Man of the Match:</strong> @dashboard.ManOfTheMatchCount</div>
     </div>
+    @if (dashboard.TopTeammate != null)
+    {
+        <div class="row mb-3">
+            <div class="col">
+                <strong>Top Teammate:</strong> @dashboard.TopTeammate.PlayerName
+                (@dashboard.TopTeammate.GamesPlayedTogether played, @dashboard.TopTeammate.WinsTogether wins together)
+            </div>
+        </div>
+    }
     <StatsSummaryComponent Label="Recent Matches" Items="recentMatchItems" />
 }
 
