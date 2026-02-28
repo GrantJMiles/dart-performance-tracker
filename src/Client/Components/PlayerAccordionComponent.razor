@@ -1,0 +1,160 @@
+@using DartPerformanceTracker.Shared.DTOs
+
+@if (Players != null && Players.Any())
+{
+    <div class="results-card">
+        <p class="section-title">Players</p>
+
+        @* Header row *@
+        <div class="player-accordion-header-row">
+            <span class="player-col-name">Player</span>
+            <span class="player-col-stat">Played</span>
+            <span class="player-col-stat">Won</span>
+            <span class="player-col-stat">Win%</span>
+            <span class="player-col-stat">Tons</span>
+            <span class="player-col-stat">180s</span>
+            <span class="player-col-motm">MOTM</span>
+        </div>
+
+        @foreach (var player in Players)
+        {
+            var totalPlayed = player.MatchTypeBreakdowns.Sum(b => b.MatchesPlayed);
+            var totalWon = player.MatchTypeBreakdowns.Sum(b => b.MatchesWon);
+            var totalTons = player.MatchTypeBreakdowns.Sum(b => b.Tons);
+            var totalMaximums = player.MatchTypeBreakdowns.Sum(b => b.Maximums);
+            var winPct = totalPlayed > 0 ? Math.Round((double)totalWon / totalPlayed * 100, 0) : 0;
+            var isExpanded = expandedPlayerId == player.PlayerId;
+
+            <div class="player-accordion-row @(isExpanded ? "expanded" : "")"
+                 @onclick="() => TogglePlayer(player.PlayerId)"
+                 style="cursor: pointer;">
+                <span class="player-col-name fw-semibold">@player.PlayerName</span>
+                <span class="player-col-stat">@totalPlayed</span>
+                <span class="player-col-stat">@totalWon</span>
+                <span class="player-col-stat">
+                    <span style="color: @(winPct >= 50 ? "var(--color-won, #4caf82)" : "var(--color-lost, #e05c5c)"); font-weight: 600;">@winPct%</span>
+                </span>
+                <span class="player-col-stat">@totalTons</span>
+                <span class="player-col-stat">@totalMaximums</span>
+                <span class="player-col-motm">@(player.ManOfTheMatchCount > 0 ? $"⭐ {player.ManOfTheMatchCount}" : "—")</span>
+            </div>
+
+            @if (isExpanded)
+            {
+                <div class="player-accordion-detail">
+                    @if (player.MatchTypeBreakdowns.Any())
+                    {
+                        <p class="small fw-semibold mb-1 text-muted">Match Type Breakdown</p>
+                        <table class="table table-sm mb-3" style="font-size: 0.83rem;">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Played</th>
+                                    <th>Won</th>
+                                    <th>Win%</th>
+                                    <th>Legs W</th>
+                                    <th>Legs L</th>
+                                    <th>Tons</th>
+                                    <th>180s</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var breakdown in player.MatchTypeBreakdowns)
+                                {
+                                    var bWinPct = breakdown.MatchesPlayed > 0
+                                        ? Math.Round((double)breakdown.MatchesWon / breakdown.MatchesPlayed * 100, 0)
+                                        : 0;
+                                    <tr>
+                                        <td>@breakdown.MatchTypeName</td>
+                                        <td>@breakdown.MatchesPlayed</td>
+                                        <td>@breakdown.MatchesWon</td>
+                                        <td>
+                                            <span class="result-badge @(bWinPct >= 50 ? "badge-won" : "badge-lost")" style="font-size:0.72rem; padding:2px 6px;">@bWinPct%</span>
+                                        </td>
+                                        <td>@breakdown.LegsWon</td>
+                                        <td>@breakdown.LegsLost</td>
+                                        <td>@breakdown.Tons</td>
+                                        <td>@breakdown.Maximums</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+
+                    @if (player.TopPairings.Any())
+                    {
+                        <p class="small fw-semibold mb-1 text-muted">Top Pairings</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            @foreach (var pairing in player.TopPairings)
+                            {
+                                <div class="p-2 rounded" style="background: rgba(255,255,255,0.05); min-width: 140px;">
+                                    <div class="fw-semibold small">@pairing.PartnerName</div>
+                                    <div class="text-muted" style="font-size:0.78rem;">@pairing.MatchesWon W / @pairing.MatchesPlayed played</div>
+                                    <span class="result-badge @(pairing.WinRatio >= 50 ? "badge-won" : "badge-lost")" style="font-size:0.72rem; padding:2px 6px;">@pairing.WinRatio%</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+}
+
+<style>
+    .player-accordion-header-row,
+    .player-accordion-row {
+        display: grid;
+        grid-template-columns: 1fr 60px 50px 60px 50px 50px 60px;
+        align-items: center;
+        padding: 8px 4px;
+        gap: 4px;
+    }
+
+    .player-accordion-header-row {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-muted, #aaa);
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+        padding-bottom: 6px;
+        margin-bottom: 2px;
+    }
+
+    .player-accordion-row {
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        font-size: 0.88rem;
+        transition: background 0.15s;
+    }
+
+    .player-accordion-row:hover,
+    .player-accordion-row.expanded {
+        background: rgba(255,255,255,0.04);
+        border-radius: 6px;
+    }
+
+    .player-col-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .player-col-stat { text-align: right; white-space: nowrap; }
+    .player-col-motm { text-align: right; white-space: nowrap; }
+
+    .player-accordion-detail {
+        padding: 10px 4px 14px 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .player-accordion-detail .table th,
+    .player-accordion-detail .table td {
+        padding: 4px 8px;
+        white-space: nowrap;
+    }
+</style>
+
+@code {
+    [Parameter] public List<TeamPlayerSeasonStatsDto>? Players { get; set; }
+
+    private int? expandedPlayerId;
+
+    private void TogglePlayer(int playerId)
+    {
+        expandedPlayerId = expandedPlayerId == playerId ? null : playerId;
+    }
+}

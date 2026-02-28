@@ -1,21 +1,28 @@
 <ApexChart TItem="GameNightSummaryDto"
-           Title="Recent Form"
+           Title="Team Performance"
            Options="@options"
            Height="260">
 
     <ApexPointSeries TItem="GameNightSummaryDto"
                      Items="@Items"
                      Name="Matches Won"
-                     SeriesType="SeriesType.Bar"
+                     SeriesType="SeriesType.Line"
                      XValue="@(e => e.Date.ToString("dd MMM"))"
                      YValue="@(e => (decimal)e.MatchesWon)" />
 
     <ApexPointSeries TItem="GameNightSummaryDto"
                      Items="@Items"
-                     Name="Matches Lost"
-                     SeriesType="SeriesType.Bar"
+                     Name="Tons"
+                     SeriesType="SeriesType.Line"
                      XValue="@(e => e.Date.ToString("dd MMM"))"
-                     YValue="@(e => (decimal)e.MatchesLost)" />
+                     YValue="@(e => (decimal)e.TotalTons)" />
+
+    <ApexPointSeries TItem="GameNightSummaryDto"
+                     Items="@Items"
+                     Name="Maximums"
+                     SeriesType="SeriesType.Line"
+                     XValue="@(e => e.Date.ToString("dd MMM"))"
+                     YValue="@(e => (decimal)e.TotalMaximums)" />
 
 </ApexChart>
 
@@ -26,20 +33,17 @@
     {
         Chart = new Chart
         {
-            Stacked = true,
             Toolbar = new Toolbar { Show = false },
             Background = "transparent"
         },
-        Colors = new List<string> { "#10b981", "#ef4444" },
+        Colors = new List<string> { "#10b981", "#f59e0b", "#3b82f6" },
         Legend = new Legend { Position = LegendPosition.Top },
-        PlotOptions = new PlotOptions
+        Stroke = new Stroke
         {
-            Bar = new PlotOptionsBar
-            {
-                BorderRadius = 4,
-                ColumnWidth = "55%"
-            }
+            Curve = Curve.Smooth,
+            Width = new List<int> { 2, 2, 2 }
         },
+        Markers = new Markers { Size = 4 },
         Xaxis = new XAxis
         {
             Labels = new XAxisLabels

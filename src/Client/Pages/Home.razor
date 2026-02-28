@@ -1,5 +1,6 @@
 @page "/"
 @inject HttpClient Http
+@using DartPerformanceTracker.Shared.DTOs
 
 <PageTitle>Dart Tracker</PageTitle>
 
@@ -102,10 +103,132 @@
         @if (recentNights.Any())
         {
             <div class="chart-card">
-                <p class="section-title">Recent Form</p>
+                <p class="section-title">Team Performance</p>
                 <FormChartComponent Items="recentNights" />
             </div>
         }
+
+        @* Stats Carousel - pure Blazor, no Bootstrap JS dependency *@
+        <div class="stats-carousel-card mb-3">
+            <div class="stats-carousel-header">
+                <button class="carousel-nav-btn" @onclick="PrevSlide">&#8249;</button>
+                <div class="stats-carousel-title">
+                    @slideTitle
+                    <div class="carousel-dots mt-1">
+                        @for (int i = 0; i < 4; i++)
+                        {
+                            var idx = i;
+                            <span class="carousel-dot @(currentSlide == idx ? "active" : "")" @onclick="() => currentSlide = idx"></span>
+                        }
+                    </div>
+                </div>
+                <button class="carousel-nav-btn" @onclick="NextSlide">&#8250;</button>
+            </div>
+            <div class="stats-carousel-body">
+                    @if (currentSlide == 0)
+                {
+                    @* Team Form *@
+                    var last5 = dashboard.GameNightSummaries.OrderByDescending(g => g.Date).Take(5).ToList();
+                    @if (last5.Any())
+                    {
+                        <div class="d-flex gap-3 flex-wrap justify-content-center">
+                            @foreach (var night in last5)
+                            {
+                                var result = night.Won ? "W" : night.MatchesWon == night.MatchesLost ? "D" : "L";
+                                var formClass = result == "W" ? "badge-won" : result == "D" ? "badge-drawn" : "badge-lost";
+                                <div class="text-center">
+                                    <span class="result-badge @formClass" style="font-size:1.1rem; padding: 0.5rem 1rem;">@result</span>
+                                    <div class="small text-muted mt-1">@night.Date.ToString("dd MMM")</div>
+                                    <div class="small text-muted">vs @night.Opponent</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="carousel-empty-state">
+                            <span class="carousel-empty-icon">&#x1F4C5;</span>
+                            <p>No results recorded yet.</p>
+                        </div>
+                    }
+                }
+                else if (currentSlide == 1)
+                {
+                    @* Singles MVP *@
+                    @if (insightsLoading)
+                    {
+                        <div class="carousel-empty-state"><div class="spinner-border spinner-border-sm"></div></div>
+                    }
+                    else if (insights?.SinglesMvp != null)
+                    {
+                        <div class="mvp-display">
+                            <div class="mvp-trophy">&#x1F3C6;</div>
+                            <div class="mvp-player-name">@insights.SinglesMvp.PlayerName</div>
+                            <div class="mvp-stat-primary">@insights.SinglesMvp.WinPercentage% win rate</div>
+                            <div class="mvp-stat-secondary">@insights.SinglesMvp.MatchesWon wins from @insights.SinglesMvp.MatchesPlayed singles games</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="carousel-empty-state">
+                            <span class="carousel-empty-icon">&#x1F3AF;</span>
+                            <p>No Singles MVP yet.</p>
+                            <p class="carousel-empty-hint">Players need at least 5 singles games to qualify.</p>
+                        </div>
+                    }
+                }
+                else if (currentSlide == 2)
+                {
+                    @* Season MVP *@
+                    @if (insightsLoading)
+                    {
+                        <div class="carousel-empty-state"><div class="spinner-border spinner-border-sm"></div></div>
+                    }
+                    else if (insights?.SeasonMvp != null)
+                    {
+                        <div class="mvp-display">
+                            <div class="mvp-trophy">&#x1F31F;</div>
+                            <div class="mvp-player-name">@insights.SeasonMvp.PlayerName</div>
+                            <div class="mvp-stat-primary">@insights.SeasonMvp.MatchesWon wins this season</div>
+                            <div class="mvp-stat-secondary">@insights.SeasonMvp.WinPercentage% win rate across @insights.SeasonMvp.MatchesPlayed singles &amp; pairs games</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="carousel-empty-state">
+                            <span class="carousel-empty-icon">&#x1F31F;</span>
+                            <p>No Season MVP data yet.</p>
+                            <p class="carousel-empty-hint">Record singles and pairs results to see the season leader.</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    @* Pairs MVP *@
+                    @if (insightsLoading)
+                    {
+                        <div class="carousel-empty-state"><div class="spinner-border spinner-border-sm"></div></div>
+                    }
+                    else if (insights?.PairsMvp != null)
+                    {
+                        <div class="mvp-display">
+                            <div class="mvp-trophy">&#x1F91D;</div>
+                            <div class="mvp-player-name">@insights.PairsMvp.Player1Name &amp; @insights.PairsMvp.Player2Name</div>
+                            <div class="mvp-stat-primary">@insights.PairsMvp.MatchesWon wins together</div>
+                            <div class="mvp-stat-secondary">@insights.PairsMvp.MatchesPlayed pairs games played</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="carousel-empty-state">
+                            <span class="carousel-empty-icon">&#x1F91D;</span>
+                            <p>No Pairs MVP data yet.</p>
+                            <p class="carousel-empty-hint">Record pairs match results to find your best duo.</p>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
 
         @if (dashboard.GameNightSummaries.Any())
         {
@@ -116,10 +239,10 @@
                     {
                         var isWon = night.Won;
                         var isDrawn = !night.Won && night.MatchesWon == night.MatchesLost;
-                        <div class="result-row">
+                        <div class="result-row" style="cursor: pointer;" @onclick="() => OpenGameNightDetail(night.GameNightId)">
                             <span class="result-date">@night.Date.ToString("dd MMM")</span>
-                            <span class="result-opponent">vs @night.Opponent @(night.IsHome ? "&#x1F3E0;" : "&#x2708;&#xFE0F;")</span>
-                            <span class="result-score">@night.MatchesWon&#x2013;@night.MatchesLost</span>
+                            <span class="result-opponent">vs @night.Opponent @(night.IsHome ? "🏠" : "✈️")</span>
+                            <span class="result-score">@night.MatchesWon–@night.MatchesLost</span>
                             <span class="result-badge @(isWon ? "badge-won" : isDrawn ? "badge-drawn" : "badge-lost")">
                                 @(isWon ? "W" : isDrawn ? "D" : "L")
                             </span>
@@ -128,8 +251,15 @@
                 </div>
             </div>
         }
+
+        <PlayerAccordionComponent Players="playerStats" />
     }
 </div>
+
+<GameNightDetailModal GameNight="selectedGameNight"
+                      Visible="modalVisible"
+                      MotmNames="motmNames"
+                      OnClose="CloseModal" />
 
 @code {
     private List<TeamDto>? teams;
@@ -137,8 +267,22 @@
     private int selectedTeamId;
     private int selectedSeasonId;
     private TeamDashboardDto? dashboard;
+    private DashboardInsightsDto? insights;
+    private List<TeamPlayerSeasonStatsDto>? playerStats;
     private bool loading = true;
+    private bool insightsLoading = false;
     private List<GameNightDto> incompleteNights = new();
+
+    private GameNightDto? selectedGameNight;
+    private bool modalVisible;
+    private List<string> motmNames = new();
+
+    private int currentSlide = 0;
+    private static readonly string[] SlideTitles = ["Team Form (Last 5)", "Singles MVP", "Season MVP", "Pairs MVPs"];
+    private string slideTitle => SlideTitles[currentSlide];
+
+    private void PrevSlide() => currentSlide = (currentSlide + 3) % 4;
+    private void NextSlide() => currentSlide = (currentSlide + 1) % 4;
 
     private List<GameNightSummaryDto> recentNights =>
         dashboard?.GameNightSummaries
@@ -188,10 +332,52 @@
     {
         loading = true;
         dashboard = null;
+        insights = null;
+        playerStats = null;
+        currentSlide = 0;
         StateHasChanged();
         if (selectedTeamId > 0 && selectedSeasonId > 0)
-            dashboard = await Http.GetFromJsonAsync<TeamDashboardDto>(
+        {
+            var dashboardTask = Http.GetFromJsonAsync<TeamDashboardDto>(
                 $"api/dashboard/team/{selectedTeamId}/season/{selectedSeasonId}");
+            var insightsTask = Http.GetFromJsonAsync<DashboardInsightsDto>(
+                $"api/dashboard/insights/{selectedTeamId}/season/{selectedSeasonId}");
+            var playerStatsTask = Http.GetFromJsonAsync<List<TeamPlayerSeasonStatsDto>>(
+                $"api/dashboard/team/{selectedTeamId}/season/{selectedSeasonId}/players");
+            await Task.WhenAll(dashboardTask, insightsTask, playerStatsTask);
+            dashboard = dashboardTask.Result;
+            insights = insightsTask.Result;
+            playerStats = playerStatsTask.Result;
+        }
         loading = false;
+    }
+
+    private async Task OpenGameNightDetail(int gameNightId)
+    {
+        var gn = await Http.GetFromJsonAsync<GameNightDto>($"api/gamenights/{gameNightId}");
+        if (gn == null) return;
+
+        selectedGameNight = gn;
+        motmNames = BuildMotmNames(gn);
+        modalVisible = true;
+    }
+
+    private List<string> BuildMotmNames(GameNightDto gn)
+    {
+        var allPlayers = gn.Matches
+            .SelectMany(m => m.PlayerStats)
+            .Where(ps => !string.IsNullOrEmpty(ps.PlayerName))
+            .GroupBy(ps => ps.PlayerId)
+            .ToDictionary(g => g.Key, g => g.First().PlayerName);
+
+        return gn.ManOfTheMatchPlayerIds
+            .Select(id => allPlayers.TryGetValue(id, out var name) ? name : $"Player {id}")
+            .ToList();
+    }
+
+    private void CloseModal()
+    {
+        modalVisible = false;
+        selectedGameNight = null;
     }
 }

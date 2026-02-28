@@ -33,4 +33,22 @@ public class DashboardFunction(IDashboardService dashboardService)
         var result = await dashboardService.GetPlayerDashboardAsync(playerId);
         return result == null ? new NotFoundResult() : new OkObjectResult(result);
     }
+
+    [Function("GetDashboardInsights")]
+    public async Task<IActionResult> GetDashboardInsights(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "dashboard/insights/{teamId:int}/season/{seasonId:int}")] HttpRequest req,
+        int teamId, int seasonId)
+    {
+        var result = await dashboardService.GetDashboardInsightsAsync(teamId, seasonId);
+        return result == null ? new NotFoundResult() : new OkObjectResult(result);
+    }
+
+    [Function("GetTeamPlayerStats")]
+    public async Task<IActionResult> GetTeamPlayerStats(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "dashboard/team/{teamId:int}/season/{seasonId:int}/players")] HttpRequest req,
+        int teamId, int seasonId)
+    {
+        var result = await dashboardService.GetTeamPlayerStatsAsync(teamId, seasonId);
+        return new OkObjectResult(result);
+    }
 }

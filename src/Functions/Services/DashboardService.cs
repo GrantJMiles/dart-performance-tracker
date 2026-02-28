@@ -20,7 +20,7 @@ public class DashboardService : IDashboardService
         if (season == null) return null;
 
         var gameNights = await _context.GameNights
-            .Include(g => g.Matches)
+            .Include(g => g.Matches).ThenInclude(m => m.PlayerStats)
             .Where(g => g.SeasonId == seasonId)
             .ToListAsync();
 
@@ -40,7 +40,7 @@ public class DashboardService : IDashboardService
             .ToListAsync();
 
         var gameNights = await _context.GameNights
-            .Include(g => g.Matches)
+            .Include(g => g.Matches).ThenInclude(m => m.PlayerStats)
             .Where(g => gameNightIds.Contains(g.Id))
             .ToListAsync();
 
@@ -61,7 +61,9 @@ public class DashboardService : IDashboardService
                 IsHome = g.IsHome,
                 MatchesWon = won,
                 MatchesLost = lost,
-                Won = won > lost
+                Won = won > lost,
+                TotalTons = g.Matches.Sum(m => m.PlayerStats.Sum(ps => ps.Tons)),
+                TotalMaximums = g.Matches.Sum(m => m.PlayerStats.Sum(ps => ps.Maximums))
             };
         }).ToList();
 
@@ -169,5 +171,180 @@ public class DashboardService : IDashboardService
             TopTeammate = topTeammate,
             RecentMatches = recentMatches
         };
+    }
+
+    public async Task<DashboardInsightsDto?> GetDashboardInsightsAsync(int teamId, int seasonId)
+    {
+        var season = await _context.Seasons.FindAsync(seasonId);
+        if (season == null) return null;
+
+        // Get all match players for this team in this season, with match type info
+        var matchPlayers = await _context.MatchPlayers
+            .Include(mp => mp.Player)
+            .Include(mp => mp.Match).ThenInclude(m => m.MatchType)
+            .Include(mp => mp.Match).ThenInclude(m => m.GameNight)
+            .Where(mp => mp.Player.TeamId == teamId && mp.Match.GameNight.SeasonId == seasonId)
+            .ToListAsync();
+
+        // Singles MVP: players in singles matches (PlayersPerSide == 1), min 5 games, best win%
+        var singlesPlayers = matchPlayers
+            .Where(mp => mp.Match.MatchType.PlayersPerSide == 1)
+            .GroupBy(mp => mp.PlayerId)
+            .Where(g => g.Count() >= 5)
+            .Select(g => new MvpDto
+            {
+                PlayerId = g.Key,
+                PlayerName = g.First().Player.Name,
+                MatchesPlayed = g.Count(),
+                MatchesWon = g.Count(mp => mp.Match.Won),
+                WinPercentage = g.Count() > 0 ? Math.Round((double)g.Count(mp => mp.Match.Won) / g.Count() * 100, 1) : 0
+            })
+            .OrderByDescending(p => p.WinPercentage)
+            .ThenByDescending(p => p.MatchesWon)
+            .FirstOrDefault();
+
+        // Season MVP: most wins across singles + pairs (PlayersPerSide <= 2)
+        var seasonMvp = matchPlayers
+            .Where(mp => mp.Match.MatchType.PlayersPerSide <= 2)
+            .GroupBy(mp => mp.PlayerId)
+            .Select(g => new MvpDto
+            {
+                PlayerId = g.Key,
+                PlayerName = g.First().Player.Name,
+                MatchesPlayed = g.Count(),
+                MatchesWon = g.Count(mp => mp.Match.Won),
+                WinPercentage = g.Count() > 0 ? Math.Round((double)g.Count(mp => mp.Match.Won) / g.Count() * 100, 1) : 0
+            })
+            .OrderByDescending(p => p.MatchesWon)
+            .ThenByDescending(p => p.WinPercentage)
+            .FirstOrDefault();
+
+        // Pairs MVP: pair with most wins in pairs matches (PlayersPerSide == 2)
+        var pairsMatches = matchPlayers
+            .Where(mp => mp.Match.MatchType.PlayersPerSide == 2)
+            .GroupBy(mp => mp.MatchId)
+            .Where(g => g.Count() == 2)
+            .ToList();
+
+        PairsMvpDto? pairsMvp = null;
+        if (pairsMatches.Count > 0)
+        {
+            var pairStats = pairsMatches
+                .Select(g =>
+                {
+                    var players = g.OrderBy(mp => mp.PlayerId).ToList();
+                    return new
+                    {
+                        Key = $"{players[0].PlayerId}_{players[1].PlayerId}",
+                        Player1Name = players[0].Player.Name,
+                        Player2Name = players[1].Player.Name,
+                        Won = g.First().Match.Won
+                    };
+                })
+                .GroupBy(x => x.Key)
+                .Select(g => new PairsMvpDto
+                {
+                    Player1Name = g.First().Player1Name,
+                    Player2Name = g.First().Player2Name,
+                    MatchesPlayed = g.Count(),
+                    MatchesWon = g.Count(x => x.Won)
+                })
+                .OrderByDescending(p => p.MatchesWon)
+                .ThenByDescending(p => p.MatchesPlayed)
+                .FirstOrDefault();
+
+            pairsMvp = pairStats;
+        }
+
+        return new DashboardInsightsDto
+        {
+            SinglesMvp = singlesPlayers,
+            SeasonMvp = seasonMvp,
+            PairsMvp = pairsMvp
+        };
+    }
+
+    public async Task<List<TeamPlayerSeasonStatsDto>> GetTeamPlayerStatsAsync(int teamId, int seasonId)
+    {
+        var matchPlayers = await _context.MatchPlayers
+            .Include(mp => mp.Player)
+            .Include(mp => mp.Match).ThenInclude(m => m.MatchType)
+            .Include(mp => mp.Match).ThenInclude(m => m.GameNight)
+            .Include(mp => mp.Match).ThenInclude(m => m.PlayerStats)
+            .Where(mp => mp.Player.TeamId == teamId && mp.Match.GameNight.SeasonId == seasonId)
+            .ToListAsync();
+
+        var motmCounts = await _context.ManOfTheMatches
+            .Where(m => m.GameNight.SeasonId == seasonId && m.Player.TeamId == teamId)
+            .GroupBy(m => m.PlayerId)
+            .Select(g => new { PlayerId = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        var motmLookup = motmCounts.ToDictionary(x => x.PlayerId, x => x.Count);
+
+        var result = matchPlayers
+            .GroupBy(mp => mp.PlayerId)
+            .Select(playerGroup =>
+            {
+                var playerId = playerGroup.Key;
+                var playerName = playerGroup.First().Player.Name;
+
+                var matchTypeBreakdowns = playerGroup
+                    .GroupBy(mp => mp.Match.MatchType.Name)
+                    .Select(typeGroup =>
+                    {
+                        var playerStats = typeGroup
+                            .SelectMany(mp => mp.Match.PlayerStats.Where(ps => ps.PlayerId == playerId))
+                            .ToList();
+                        return new PlayerMatchTypeBreakdownDto
+                        {
+                            MatchTypeName = typeGroup.Key,
+                            MatchesPlayed = typeGroup.Count(),
+                            MatchesWon = typeGroup.Count(mp => mp.Match.Won),
+                            LegsWon = typeGroup.Sum(mp => mp.Match.LegsWon),
+                            LegsLost = typeGroup.Sum(mp => mp.Match.LegsLost),
+                            Tons = playerStats.Sum(ps => ps.Tons),
+                            Maximums = playerStats.Sum(ps => ps.Maximums)
+                        };
+                    })
+                    .ToList();
+
+                var matchIds = playerGroup.Select(mp => mp.MatchId).ToHashSet();
+                var coPlayers = matchPlayers
+                    .Where(mp => matchIds.Contains(mp.MatchId) && mp.PlayerId != playerId)
+                    .ToList();
+
+                var topPairings = coPlayers
+                    .GroupBy(mp => mp.PlayerId)
+                    .Select(g =>
+                    {
+                        var played = g.Count();
+                        var won = g.Count(mp => mp.Match.Won);
+                        return new TopPairingDto
+                        {
+                            PartnerName = g.First().Player.Name,
+                            MatchesPlayed = played,
+                            MatchesWon = won,
+                            WinRatio = played > 0 ? Math.Round((double)won / played * 100, 1) : 0
+                        };
+                    })
+                    .OrderByDescending(p => p.MatchesWon)
+                    .ThenByDescending(p => p.MatchesPlayed)
+                    .Take(2)
+                    .ToList();
+
+                return new TeamPlayerSeasonStatsDto
+                {
+                    PlayerId = playerId,
+                    PlayerName = playerName,
+                    ManOfTheMatchCount = motmLookup.GetValueOrDefault(playerId, 0),
+                    MatchTypeBreakdowns = matchTypeBreakdowns,
+                    TopPairings = topPairings
+                };
+            })
+            .OrderBy(p => p.PlayerName)
+            .ToList();
+
+        return result;
     }
 }

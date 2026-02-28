@@ -1,0 +1,99 @@
+@using DartPerformanceTracker.Shared.DTOs
+
+@if (Visible && GameNight != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" @onclick="HandleBackdropClick">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @GameNight.Date.ToString("dd MMM yyyy") vs @GameNight.Opponent
+                        @(GameNight.IsHome ? "🏠" : "✈️")
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="OnClose"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!GameNight.Matches.Any())
+                    {
+                        <p class="text-muted">No match data recorded.</p>
+                    }
+                    else
+                    {
+                        var totalWon = GameNight.Matches.Count(m => m.Won);
+                        var totalLost = GameNight.Matches.Count(m => !m.Won);
+                        var nightResult = totalWon > totalLost ? "W" : totalWon == totalLost ? "D" : "L";
+                        var nightBadgeClass = nightResult == "W" ? "bg-success" : nightResult == "D" ? "bg-secondary" : "bg-danger";
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Type</th>
+                                    <th>Players</th>
+                                    <th class="text-center">Score</th>
+                                    <th class="text-center">Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var match in GameNight.Matches.OrderBy(m => m.OrderIndex))
+                                {
+                                    var isWon = match.Won;
+                                    var isDraw = match.LegsWon == match.LegsLost;
+                                    var playerNames = string.Join(" & ", match.PlayerStats.Select(ps => ps.PlayerName).Where(n => !string.IsNullOrEmpty(n)));
+                                    <tr>
+                                        <td>@(match.OrderIndex + 1)</td>
+                                        <td>@match.MatchTypeName</td>
+                                        <td>@playerNames</td>
+                                        <td class="text-center">@match.LegsWon&ndash;@match.LegsLost</td>
+                                        <td class="text-center">
+                                            <span class="badge @(isWon ? "bg-success" : isDraw ? "bg-secondary" : "bg-danger")">
+                                                @(isWon ? "W" : isDraw ? "D" : "L")
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    @if (match.PlayerStats.Any(ps => ps.Tons > 0 || ps.Maximums > 0))
+                                    {
+                                        <tr class="table-light">
+                                            <td></td>
+                                            <td colspan="4" class="small text-muted ps-3">
+                                                @foreach (var ps in match.PlayerStats.Where(ps => ps.Tons > 0 || ps.Maximums > 0))
+                                                {
+                                                    <span class="me-3">
+                                                        @ps.PlayerName:
+                                                        @if (ps.Tons > 0) { <span>@ps.Tons ton@(ps.Tons != 1 ? "s" : "")</span> }
+                                                        @if (ps.Maximums > 0) { <span class="ms-1">@ps.Maximums max@(ps.Maximums != 1 ? "s" : "")</span> }
+                                                    </span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <strong>Final: @totalWon&ndash;@totalLost</strong>
+                            <span class="badge @nightBadgeClass fs-6">@nightResult</span>
+                        </div>
+                        @if (GameNight.ManOfTheMatchPlayerIds.Any() && MotmNames.Any())
+                        {
+                            <div class="mt-2 text-muted small">
+                                &#11088; Man of the Match: @string.Join(", ", MotmNames)
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="OnClose">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public GameNightDto? GameNight { get; set; }
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public List<string> MotmNames { get; set; } = new();
+
+    private void HandleBackdropClick() => OnClose.InvokeAsync();
+}

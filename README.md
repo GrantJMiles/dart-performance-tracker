@@ -85,11 +85,7 @@ dotnet run --project src/Client/DartPerformanceTracker.Client.csproj
 ```bash
 az group create --name dart-tracker-rg --location uksouth
 
-az deployment group create \
-  --resource-group dart-tracker-rg \
-  --template-file infrastructure/main.bicep \
-  --parameters infrastructure/parameters.prod.json \
-  --parameters sqlAdminPassword="<your-password>"
+az deployment group create --resource-group dart-tracker-rg --template-file infrastructure/main.bicep --parameters infrastructure/parameters.prod.json --parameters sqlAdminPassword="Q&10ld9-8G$e"
 ```
 
 The deployment outputs:

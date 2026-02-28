@@ -19,7 +19,7 @@ public class GameNightService : IGameNightService
         var gn = await _context.GameNights
             .Include(g => g.Matches).ThenInclude(m => m.MatchType)
             .Include(g => g.Matches).ThenInclude(m => m.MatchPlayers)
-            .Include(g => g.Matches).ThenInclude(m => m.PlayerStats)
+            .Include(g => g.Matches).ThenInclude(m => m.PlayerStats).ThenInclude(ps => ps.Player)
             .Include(g => g.ManOfTheMatchAwards)
             .FirstOrDefaultAsync(g => g.Id == id);
 
@@ -179,6 +179,7 @@ public class GameNightService : IGameNightService
                 {
                     Id = ps.Id,
                     PlayerId = ps.PlayerId,
+                    PlayerName = ps.Player?.Name ?? string.Empty,
                     Tons = ps.Tons,
                     Maximums = ps.Maximums
                 }).ToList()
