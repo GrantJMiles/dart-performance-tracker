@@ -43,6 +43,8 @@
                             <th>Name</th>
                             <th>Start</th>
                             <th>End</th>
+                            <th>Max Score</th>
+                            <th>Matches</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,6 +54,8 @@
                                 <td><strong>@season.Name</strong></td>
                                 <td>@season.StartDate.ToShortDateString()</td>
                                 <td>@season.EndDate.ToShortDateString()</td>
+                                <td>@season.MaximumScore</td>
+                                <td class="text-muted small">@season.MatchConfigurations.Count slots</td>
                             </tr>
                         }
                     </tbody>
@@ -79,9 +83,67 @@
                         <label class="form-label">End Date</label>
                         <InputDate class="form-control" @bind-Value="newSeason.EndDate" />
                     </div>
-                    <div class="d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Add Season</button>
+                    <div>
+                        <label class="form-label">Maximum Score</label>
+                        <InputNumber class="form-control" @bind-Value="newSeason.MaximumScore" />
+                        <div class="form-text">e.g. 180 (standard), 170 (cricket/bull)</div>
                     </div>
+                </div>
+
+                <div class="mt-3">
+                    <label class="form-label fw-semibold">Match Format</label>
+                    <p class="text-muted small mb-2">Build the playing order for this season. Each entry = one match on the night.</p>
+                    @if (matchTypes != null && matchTypes.Any())
+                    {
+                        <div class="d-flex gap-2 mb-2">
+                            <select class="form-select form-select-sm" style="max-width: 260px;" @bind="selectedMatchTypeId">
+                                <option value="0">-- Select Match Type --</option>
+                                @foreach (var mt in matchTypes)
+                                {
+                                    <option value="@mt.Id">@mt.Name (@mt.PlayersPerSide v @mt.PlayersPerSide)</option>
+                                }
+                            </select>
+                            <button type="button" class="btn btn-sm btn-secondary" @onclick="AddMatchSlot"
+                                    disabled="@(selectedMatchTypeId == 0)">
+                                + Add
+                            </button>
+                        </div>
+
+                        @if (newSeason.MatchConfigurations.Any())
+                        {
+                            <div class="list-group mb-3" style="max-width: 420px;">
+                                @for (int i = 0; i < newSeason.MatchConfigurations.Count; i++)
+                                {
+                                    var idx = i;
+                                    var mtName = matchTypes.FirstOrDefault(mt => mt.Id == newSeason.MatchConfigurations[idx].MatchTypeId)?.Name ?? "Unknown";
+                                    <div class="list-group-item d-flex align-items-center gap-2 py-1 px-2">
+                                        <span class="text-muted small" style="min-width: 24px;">@(idx + 1).</span>
+                                        <span class="flex-grow-1 small">@mtName</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1"
+                                                @onclick="() => MoveMatchSlotUp(idx)"
+                                                disabled="@(idx == 0)" title="Move up">▲</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1"
+                                                @onclick="() => MoveMatchSlotDown(idx)"
+                                                disabled="@(idx == newSeason.MatchConfigurations.Count - 1)" title="Move down">▼</button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1"
+                                                @onclick="() => RemoveMatchSlot(idx)" title="Remove">✕</button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted small">No matches added yet.</p>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted small">Loading match types...</p>
+                    }
+                </div>
+
+                <div class="mt-2">
+                    <button type="submit" class="btn btn-primary">Add Season</button>
                 </div>
             </EditForm>
         }
@@ -212,16 +274,18 @@
     private List<SeasonDto>? seasons;
     private List<TeamDto>? teams;
     private List<PlayerDto>? players;
+    private List<MatchTypeDto>? matchTypes;
 
     private CreateSeasonDto newSeason = new() { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(6) };
     private CreateTeamDto newTeam = new();
     private CreatePlayerDto newPlayer = new() { IsActive = true };
+    private int selectedMatchTypeId = 0;
 
     [Inject] private HttpClient Http { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.WhenAll(LoadSeasons(), LoadTeams(), LoadPlayers());
+        await Task.WhenAll(LoadSeasons(), LoadTeams(), LoadPlayers(), LoadMatchTypes());
     }
 
     private void SetTab(string tab)
@@ -238,6 +302,54 @@
     private async Task LoadPlayers() =>
         players = await Http.GetFromJsonAsync<List<PlayerDto>>("api/players");
 
+    private async Task LoadMatchTypes() =>
+        matchTypes = await Http.GetFromJsonAsync<List<MatchTypeDto>>("api/matchtypes");
+
+    // --- Match format builder ---
+
+    private void AddMatchSlot()
+    {
+        if (selectedMatchTypeId == 0) return;
+        newSeason.MatchConfigurations.Add(new CreateSeasonMatchConfigurationDto
+        {
+            MatchTypeId = selectedMatchTypeId,
+            OrderIndex = newSeason.MatchConfigurations.Count
+        });
+        RenumberMatchSlots();
+    }
+
+    private void MoveMatchSlotUp(int index)
+    {
+        if (index <= 0) return;
+        var item = newSeason.MatchConfigurations[index];
+        newSeason.MatchConfigurations.RemoveAt(index);
+        newSeason.MatchConfigurations.Insert(index - 1, item);
+        RenumberMatchSlots();
+    }
+
+    private void MoveMatchSlotDown(int index)
+    {
+        if (index >= newSeason.MatchConfigurations.Count - 1) return;
+        var item = newSeason.MatchConfigurations[index];
+        newSeason.MatchConfigurations.RemoveAt(index);
+        newSeason.MatchConfigurations.Insert(index + 1, item);
+        RenumberMatchSlots();
+    }
+
+    private void RemoveMatchSlot(int index)
+    {
+        newSeason.MatchConfigurations.RemoveAt(index);
+        RenumberMatchSlots();
+    }
+
+    private void RenumberMatchSlots()
+    {
+        for (int i = 0; i < newSeason.MatchConfigurations.Count; i++)
+            newSeason.MatchConfigurations[i].OrderIndex = i;
+    }
+
+    // --- CRUD handlers ---
+
     private async Task AddSeason()
     {
         var response = await Http.PostAsJsonAsync("api/seasons", newSeason);
@@ -246,6 +358,7 @@
             var created = await response.Content.ReadFromJsonAsync<SeasonDto>();
             seasons?.Add(created!);
             newSeason = new CreateSeasonDto { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(6) };
+            selectedMatchTypeId = 0;
         }
     }
 

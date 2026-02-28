@@ -1,70 +1,245 @@
 @page "/matchday"
 @using DartPerformanceTracker.Shared.DTOs
 @inject HttpClient Http
+@inject NavigationManager Nav
 
-<h3>Game Night Entry</h3>
+<PageTitle>Match Night Entry</PageTitle>
 
-<div class="mb-2">
-    <label>Season</label>
-    <select class="form-control" @onchange="OnSeasonChanged">
-        <option value="0">-- Select Season --</option>
-        @foreach (var season in seasons)
-        {
-            <option value="@season.Id">@season.Name</option>
-        }
-    </select>
-</div>
+<div style="max-width: 640px; margin: 0 auto;">
 
-@if (selectedSeason != null)
+@if (step == Step.Setup)
 {
-    <div class="mb-2">
-        <label>Date</label>
-        <InputDate class="form-control" @bind-Value="model.Date" />
+    <h3>New Match Night</h3>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Season</label>
+                <select class="form-select" @onchange="OnSeasonChanged">
+                    <option value="0">-- Select Season --</option>
+                    @foreach (var season in seasons)
+                    {
+                        <option value="@season.Id">@season.Name</option>
+                    }
+                </select>
+            </div>
+            @if (selectedSeason != null)
+            {
+                <div class="mb-3">
+                    <label class="form-label">Date</label>
+                    <InputDate class="form-control" @bind-Value="setupDate" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Opponent</label>
+                    <InputText class="form-control" @bind-Value="setupOpponent" placeholder="Opponent team name" />
+                </div>
+                <div class="mb-3 form-check">
+                    <InputCheckbox class="form-check-input" @bind-Value="setupIsHome" id="isHome" />
+                    <label class="form-check-label" for="isHome">Home Game</label>
+                </div>
+                <div class="mb-3">
+                    <p class="text-muted small mb-1">
+                        <strong>@orderedConfigs.Count matches</strong> in this season's format:
+                        @string.Join(", ", orderedConfigs.Select(c => c.MatchTypeName))
+                    </p>
+                </div>
+                <button class="btn btn-primary" @onclick="BeginMatchNight" disabled="@(saving || string.IsNullOrWhiteSpace(setupOpponent))">
+                    @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                    Begin Match Night
+                </button>
+            }
+        </div>
     </div>
-    <div class="mb-2">
-        <label>Opponent</label>
-        <InputText class="form-control" @bind-Value="model.Opponent" />
-    </div>
-    <div class="mb-2">
-        <InputCheckbox @bind-Value="model.IsHome" /> Home Game
+}
+else if (step == Step.Matches && createdGameNight != null)
+{
+    var config = orderedConfigs[currentMatchIndex];
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 class="mb-0">Match @(currentMatchIndex + 1) of @totalMatches</h3>
+        <span class="badge bg-secondary fs-6">vs @createdGameNight.Opponent &mdash; @createdGameNight.Date.ToString("dd MMM yyyy")</span>
     </div>
 
-    <h4>Matches</h4>
-    @foreach (var (config, index) in selectedSeason.MatchConfigurations.Select((c, i) => (c, i)))
-    {
-        for (int mi = 0; mi < config.NumberOfMatches; mi++)
-        {
-            var matchIndex = GetMatchIndex(index, mi);
-            <MatchEntryComponent
-                Config="config"
-                Players="players"
-                Match="model.Matches[matchIndex]"
-                MatchNumber="mi + 1" />
-        }
-    }
+    <div class="progress mb-3" style="height: 6px;">
+        <div class="progress-bar" role="progressbar"
+             style="width: @(((currentMatchIndex) * 100) / totalMatches)%"></div>
+    </div>
 
-    <h4>Man of the Match</h4>
-    <PlayerSelectorComponent Players="players" SelectedPlayerIds="model.ManOfTheMatchPlayerIds" Label="Man of the Match" />
-
-    <button class="btn btn-success mt-3" @onclick="Submit">Submit Game Night</button>
+    <MatchEntryComponent
+        Config="config"
+        Players="players"
+        Match="matchEdits[currentMatchIndex]"
+        MatchNumber="currentMatchIndex + 1"
+        MaximumScore="selectedSeason?.MaximumScore ?? 180" />
 
     @if (!string.IsNullOrEmpty(message))
     {
-        <div class="alert alert-info mt-2">@message</div>
+        <div class="alert alert-danger mt-2">@message</div>
     }
+
+    <div class="d-flex gap-2 mt-2">
+        @if (currentMatchIndex > 0)
+        {
+            <button class="btn btn-outline-secondary" @onclick="GoToPrevious">◀ Previous</button>
+        }
+        <button class="btn btn-primary ms-auto" @onclick="SaveAndContinue" disabled="@saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            @(currentMatchIndex == totalMatches - 1 ? "Save & Review" : "Save & Continue ▶")
+        </button>
+    </div>
+}
+else if (step == Step.Review && createdGameNight != null)
+{
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 class="mb-0">Review &amp; Player of the Match</h3>
+        <span class="badge bg-secondary fs-6">vs @createdGameNight.Opponent &mdash; @createdGameNight.Date.ToString("dd MMM yyyy")</span>
+    </div>
+
+    <div class="progress mb-3" style="height: 6px;">
+        <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+    </div>
+
+    @foreach (var (match, idx) in createdGameNight.Matches.Select((m, i) => (m, i)))
+    {
+        var cfg = idx < orderedConfigs.Count ? orderedConfigs[idx] : null;
+        <div class="card mb-2">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <span><strong>Match @(idx + 1)</strong> &mdash; @match.MatchTypeName</span>
+                <span class="badge @(match.Won ? "bg-success" : "bg-danger")">
+                    @match.LegsWon &ndash; @match.LegsLost @(match.Won ? "W" : "L")
+                </span>
+            </div>
+            @if (match.PlayerIds.Any())
+            {
+                <div class="card-body py-2">
+                    @foreach (var playerId in match.PlayerIds)
+                    {
+                        var playerName = players.FirstOrDefault(p => p.Id == playerId)?.Name ?? playerId.ToString();
+                        var stats = match.PlayerStats.FirstOrDefault(s => s.PlayerId == playerId);
+                        <div class="d-flex gap-3 align-items-center small">
+                            <span class="fw-semibold" style="min-width: 120px;">@playerName</span>
+                            @if (stats != null)
+                            {
+                                <span class="text-muted">Tons: <strong>@stats.Tons</strong></span>
+                                <span class="text-muted">180s: <strong>@stats.Maximums</strong></span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    <div class="card mt-3">
+        <div class="card-header"><strong>Player of the Match</strong></div>
+        <div class="card-body">
+            <PlayerSelectorComponent
+                Players="players"
+                SelectedPlayerIds="motmPlayerIds"
+                Label="Select player(s) of the match"
+                Prefix="motm" />
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert alert-danger mt-2">@message</div>
+    }
+
+    <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-outline-secondary" @onclick="BackToLastMatch">◀ Back to Matches</button>
+        <button class="btn btn-success ms-auto" @onclick="FinalSave" disabled="@saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            &#x2714; Final Save
+        </button>
+    </div>
+}
+else if (step == Step.Done)
+{
+    <div class="text-center py-5">
+        <div style="font-size: 3rem;">&#x1F3AF;</div>
+        <h3 class="mt-2">Match night saved!</h3>
+        <p class="text-muted">vs @savedOpponent — all @totalMatches matches recorded.</p>
+        <div class="d-flex gap-2 justify-content-center mt-3">
+            <a href="/" class="btn btn-outline-primary">Back to Dashboard</a>
+            <button class="btn btn-primary" @onclick="StartNew">Enter Another Night</button>
+        </div>
+    </div>
 }
 
+</div>
+
 @code {
+    [Parameter, SupplyParameterFromQuery] public int? Id { get; set; }
+
+    private enum Step { Setup, Matches, Review, Done }
+    private Step step = Step.Setup;
+
     private List<SeasonDto> seasons = new();
     private List<PlayerDto> players = new();
     private SeasonDto? selectedSeason;
-    private CreateGameNightDto model = new() { Date = DateTime.Today };
+    private List<SeasonMatchConfigurationDto> orderedConfigs = new();
+
+    // Setup fields
+    private DateTime setupDate = DateTime.Today;
+    private string setupOpponent = string.Empty;
+    private bool setupIsHome = false;
+
+    // After creation
+    private GameNightDto? createdGameNight;
+    private List<UpdateMatchDto> matchEdits = new();
+    private int currentMatchIndex = 0;
+    private int totalMatches => orderedConfigs.Count;
+
+    // Review
+    private List<int> motmPlayerIds = new();
+
+    // Done
+    private string savedOpponent = string.Empty;
+
     private string message = string.Empty;
+    private bool saving = false;
 
     protected override async Task OnInitializedAsync()
     {
-        seasons = await Http.GetFromJsonAsync<List<SeasonDto>>("api/seasons") ?? new();
-        players = await Http.GetFromJsonAsync<List<PlayerDto>>("api/players") ?? new();
+        var seasonsTask = Http.GetFromJsonAsync<List<SeasonDto>>("api/seasons");
+        var playersTask = Http.GetFromJsonAsync<List<PlayerDto>>("api/players");
+        await Task.WhenAll(seasonsTask, playersTask);
+        seasons = seasonsTask.Result ?? new();
+        players = playersTask.Result ?? new();
+
+        if (Id.HasValue && Id > 0)
+            await ResumeGameNight(Id.Value);
+    }
+
+    private async Task ResumeGameNight(int id)
+    {
+        createdGameNight = await Http.GetFromJsonAsync<GameNightDto>($"api/gamenights/{id}");
+        if (createdGameNight == null) return;
+
+        selectedSeason = seasons.FirstOrDefault(s => s.Id == createdGameNight.SeasonId);
+        if (selectedSeason == null) return;
+
+        orderedConfigs = selectedSeason.MatchConfigurations.OrderBy(c => c.OrderIndex).ToList();
+
+        matchEdits = createdGameNight.Matches.Select(m => new UpdateMatchDto
+        {
+            LegsWon = m.LegsWon,
+            LegsLost = m.LegsLost,
+            PlayerIds = m.PlayerIds.ToList(),
+            PlayerStats = m.PlayerStats.Select(ps => new CreatePlayerMatchStatsDto
+            {
+                PlayerId = ps.PlayerId,
+                Tons = ps.Tons,
+                Maximums = ps.Maximums
+            }).ToList()
+        }).ToList();
+
+        // Resume at the first match that hasn't had any players selected yet
+        currentMatchIndex = matchEdits.FindIndex(m => m.PlayerIds.Count == 0 && m.LegsWon == 0 && m.LegsLost == 0);
+        if (currentMatchIndex < 0) currentMatchIndex = totalMatches;
+
+        step = currentMatchIndex >= totalMatches ? Step.Review : Step.Matches;
     }
 
     private void OnSeasonChanged(ChangeEventArgs e)
@@ -72,42 +247,122 @@
         if (int.TryParse(e.Value?.ToString(), out var id) && id > 0)
         {
             selectedSeason = seasons.FirstOrDefault(s => s.Id == id);
-            model.SeasonId = id;
-            model.Matches.Clear();
-            if (selectedSeason != null)
-            {
-                foreach (var config in selectedSeason.MatchConfigurations.OrderBy(c => c.OrderIndex))
-                {
-                    for (int i = 0; i < config.NumberOfMatches; i++)
-                    {
-                        model.Matches.Add(new CreateMatchDto { MatchTypeId = config.MatchTypeId });
-                    }
-                }
-            }
+            orderedConfigs = selectedSeason?.MatchConfigurations.OrderBy(c => c.OrderIndex).ToList() ?? new();
         }
     }
 
-    private int GetMatchIndex(int configIndex, int matchInConfig)
+    private async Task BeginMatchNight()
     {
-        if (selectedSeason == null) return 0;
-        int offset = 0;
-        for (int i = 0; i < configIndex; i++)
-            offset += selectedSeason.MatchConfigurations[i].NumberOfMatches;
-        return offset + matchInConfig;
-    }
+        if (selectedSeason == null || string.IsNullOrWhiteSpace(setupOpponent)) return;
 
-    private async Task Submit()
-    {
-        var response = await Http.PostAsJsonAsync("api/gamenights", model);
+        saving = true;
+        message = string.Empty;
+
+        var matchShells = orderedConfigs.Select(c => new CreateMatchDto
+        {
+            MatchTypeId = c.MatchTypeId,
+            OrderIndex = c.OrderIndex
+        }).ToList();
+
+        var dto = new CreateGameNightDto
+        {
+            SeasonId = selectedSeason.Id,
+            Date = setupDate,
+            Opponent = setupOpponent,
+            IsHome = setupIsHome,
+            Matches = matchShells,
+            ManOfTheMatchPlayerIds = new()
+        };
+
+        var response = await Http.PostAsJsonAsync("api/gamenights", dto);
         if (response.IsSuccessStatusCode)
         {
-            message = "Game night saved successfully!";
-            model = new CreateGameNightDto { Date = DateTime.Today };
-            selectedSeason = null;
+            createdGameNight = await response.Content.ReadFromJsonAsync<GameNightDto>();
+            matchEdits = orderedConfigs.Select(_ => new UpdateMatchDto()).ToList();
+            currentMatchIndex = 0;
+            step = Step.Matches;
         }
         else
         {
-            message = "Error saving game night.";
+            message = "Error creating match night. Please try again.";
         }
+        saving = false;
+    }
+
+    private async Task SaveAndContinue()
+    {
+        if (createdGameNight == null) return;
+        saving = true;
+        message = string.Empty;
+
+        var matchId = createdGameNight.Matches[currentMatchIndex].Id;
+        var response = await Http.PatchAsJsonAsync(
+            $"api/gamenights/{createdGameNight.Id}/matches/{matchId}",
+            matchEdits[currentMatchIndex]);
+
+        if (response.IsSuccessStatusCode)
+        {
+            currentMatchIndex++;
+            if (currentMatchIndex >= totalMatches)
+            {
+                // Re-fetch to populate review with fresh data
+                createdGameNight = await Http.GetFromJsonAsync<GameNightDto>($"api/gamenights/{createdGameNight.Id}");
+                step = Step.Review;
+            }
+        }
+        else
+        {
+            message = "Error saving match. Please try again.";
+        }
+        saving = false;
+    }
+
+    private void GoToPrevious()
+    {
+        if (currentMatchIndex > 0) currentMatchIndex--;
+        message = string.Empty;
+    }
+
+    private void BackToLastMatch()
+    {
+        currentMatchIndex = totalMatches - 1;
+        step = Step.Matches;
+        message = string.Empty;
+    }
+
+    private async Task FinalSave()
+    {
+        if (createdGameNight == null) return;
+        saving = true;
+        message = string.Empty;
+
+        var dto = new UpdateMotmDto { PlayerIds = motmPlayerIds };
+        var response = await Http.PatchAsJsonAsync($"api/gamenights/{createdGameNight.Id}/motm", dto);
+
+        if (response.IsSuccessStatusCode)
+        {
+            savedOpponent = createdGameNight.Opponent;
+            step = Step.Done;
+        }
+        else
+        {
+            message = "Error saving. Please try again.";
+        }
+        saving = false;
+    }
+
+    private void StartNew()
+    {
+        step = Step.Setup;
+        createdGameNight = null;
+        matchEdits = new();
+        currentMatchIndex = 0;
+        setupOpponent = string.Empty;
+        setupIsHome = false;
+        setupDate = DateTime.Today;
+        selectedSeason = null;
+        orderedConfigs = new();
+        motmPlayerIds = new();
+        message = string.Empty;
     }
 }

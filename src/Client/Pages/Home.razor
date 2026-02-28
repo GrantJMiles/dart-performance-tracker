@@ -28,6 +28,22 @@
         </div>
     </div>
 
+    @if (incompleteNights.Any())
+    {
+        <div class="alert alert-warning mb-3" style="border-radius: 8px;">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <strong>&#x26A0;&#xFE0F; Incomplete match nights</strong>
+            </div>
+            @foreach (var night in incompleteNights)
+            {
+                <div class="d-flex align-items-center gap-2 mt-1">
+                    <span class="small">vs @night.Opponent &mdash; @night.Date.ToString("dd MMM yyyy")</span>
+                    <a href="/matchday?id=@night.Id" class="btn btn-sm btn-warning py-0">Continue ▶</a>
+                </div>
+            }
+        </div>
+    }
+
     @if (loading)
     {
         <div class="loading-state">
@@ -122,6 +138,7 @@
     private int selectedSeasonId;
     private TeamDashboardDto? dashboard;
     private bool loading = true;
+    private List<GameNightDto> incompleteNights = new();
 
     private List<GameNightSummaryDto> recentNights =>
         dashboard?.GameNightSummaries
@@ -133,10 +150,12 @@
     {
         var teamsTask = Http.GetFromJsonAsync<List<TeamDto>>("api/teams");
         var seasonsTask = Http.GetFromJsonAsync<List<SeasonDto>>("api/seasons");
-        await Task.WhenAll(teamsTask, seasonsTask);
+        var incompleteTask = Http.GetFromJsonAsync<List<GameNightDto>>("api/gamenights?incomplete=true");
+        await Task.WhenAll(teamsTask, seasonsTask, incompleteTask);
 
         teams = teamsTask.Result;
         seasons = seasonsTask.Result;
+        incompleteNights = incompleteTask.Result ?? new();
 
         if (teams != null && teams.Any())
             selectedTeamId = teams.First().Id;

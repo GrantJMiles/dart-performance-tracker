@@ -24,6 +24,7 @@ public class SeasonService : ISeasonService
                 Name = s.Name,
                 StartDate = s.StartDate,
                 EndDate = s.EndDate,
+                MaximumScore = s.MaximumScore,
                 MatchConfigurations = s.MatchConfigurations.Select(mc => new SeasonMatchConfigurationDto
                 {
                     Id = mc.Id,
@@ -31,7 +32,6 @@ public class SeasonService : ISeasonService
                     MatchTypeId = mc.MatchTypeId,
                     MatchTypeName = mc.MatchType.Name,
                     PlayersPerSide = mc.MatchType.PlayersPerSide,
-                    NumberOfMatches = mc.NumberOfMatches,
                     OrderIndex = mc.OrderIndex
                 }).OrderBy(mc => mc.OrderIndex).ToList()
             })
@@ -45,10 +45,10 @@ public class SeasonService : ISeasonService
             Name = dto.Name,
             StartDate = dto.StartDate,
             EndDate = dto.EndDate,
+            MaximumScore = dto.MaximumScore,
             MatchConfigurations = dto.MatchConfigurations.Select(mc => new SeasonMatchConfiguration
             {
                 MatchTypeId = mc.MatchTypeId,
-                NumberOfMatches = mc.NumberOfMatches,
                 OrderIndex = mc.OrderIndex
             }).ToList()
         };
@@ -65,6 +65,7 @@ public class SeasonService : ISeasonService
             Name = created.Name,
             StartDate = created.StartDate,
             EndDate = created.EndDate,
+            MaximumScore = created.MaximumScore,
             MatchConfigurations = created.MatchConfigurations.Select(mc => new SeasonMatchConfigurationDto
             {
                 Id = mc.Id,
@@ -72,7 +73,6 @@ public class SeasonService : ISeasonService
                 MatchTypeId = mc.MatchTypeId,
                 MatchTypeName = mc.MatchType.Name,
                 PlayersPerSide = mc.MatchType.PlayersPerSide,
-                NumberOfMatches = mc.NumberOfMatches,
                 OrderIndex = mc.OrderIndex
             }).OrderBy(mc => mc.OrderIndex).ToList()
         };

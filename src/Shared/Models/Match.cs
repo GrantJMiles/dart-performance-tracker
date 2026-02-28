@@ -10,6 +10,7 @@ public class Match
     public int LegsWon { get; set; }
     public int LegsLost { get; set; }
     public bool Won { get; set; }
+    public int OrderIndex { get; set; }
     public ICollection<MatchPlayer> MatchPlayers { get; set; } = new List<MatchPlayer>();
     public ICollection<PlayerMatchStats> PlayerStats { get; set; } = new List<PlayerMatchStats>();
 }

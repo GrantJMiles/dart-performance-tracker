@@ -6,6 +6,7 @@ public class Season
     public string Name { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public int MaximumScore { get; set; } = 180;
     public ICollection<SeasonMatchConfiguration> MatchConfigurations { get; set; } = new List<SeasonMatchConfiguration>();
     public ICollection<GameNight> GameNights { get; set; } = new List<GameNight>();
 }

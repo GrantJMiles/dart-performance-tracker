@@ -8,6 +8,7 @@ public class GameNight
     public DateTime Date { get; set; }
     public string Opponent { get; set; } = string.Empty;
     public bool IsHome { get; set; }
+    public bool IsComplete { get; set; }
     public ICollection<Match> Matches { get; set; } = new List<Match>();
     public ICollection<ManOfTheMatch> ManOfTheMatchAwards { get; set; } = new List<ManOfTheMatch>();
 }

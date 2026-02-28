@@ -15,6 +15,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ISeasonService, SeasonService>();
+builder.Services.AddScoped<IMatchTypeService, MatchTypeService>();
 builder.Services.AddScoped<IGameNightService, GameNightService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 

@@ -6,6 +6,7 @@ public class SeasonDto
     public string Name { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public int MaximumScore { get; set; } = 180;
     public List<SeasonMatchConfigurationDto> MatchConfigurations { get; set; } = new();
 }
 
@@ -14,6 +15,7 @@ public class CreateSeasonDto
     public string Name { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public int MaximumScore { get; set; } = 180;
     public List<CreateSeasonMatchConfigurationDto> MatchConfigurations { get; set; } = new();
 }
 
@@ -24,13 +26,11 @@ public class SeasonMatchConfigurationDto
     public int MatchTypeId { get; set; }
     public string MatchTypeName { get; set; } = string.Empty;
     public int PlayersPerSide { get; set; }
-    public int NumberOfMatches { get; set; }
     public int OrderIndex { get; set; }
 }
 
 public class CreateSeasonMatchConfigurationDto
 {
     public int MatchTypeId { get; set; }
-    public int NumberOfMatches { get; set; }
     public int OrderIndex { get; set; }
 }

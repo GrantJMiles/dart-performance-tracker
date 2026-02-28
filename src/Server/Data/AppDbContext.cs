@@ -45,7 +45,8 @@ public class AppDbContext : DbContext
             new Shared.Models.MatchType { Id = 2, Name = "Pairs", PlayersPerSide = 2 },
             new Shared.Models.MatchType { Id = 3, Name = "Triples", PlayersPerSide = 3 },
             new Shared.Models.MatchType { Id = 4, Name = "Fours", PlayersPerSide = 4 },
-            new Shared.Models.MatchType { Id = 5, Name = "Sixes", PlayersPerSide = 6 }
+            new Shared.Models.MatchType { Id = 5, Name = "Sixes", PlayersPerSide = 6 },
+            new Shared.Models.MatchType { Id = 6, Name = "Blind Pairs", PlayersPerSide = 2 }
         );
     }
 }

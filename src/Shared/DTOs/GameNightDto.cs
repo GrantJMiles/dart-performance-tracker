@@ -7,6 +7,7 @@ public class GameNightDto
     public DateTime Date { get; set; }
     public string Opponent { get; set; } = string.Empty;
     public bool IsHome { get; set; }
+    public bool IsComplete { get; set; }
     public List<MatchDto> Matches { get; set; } = new();
     public List<int> ManOfTheMatchPlayerIds { get; set; } = new();
 }
@@ -27,9 +28,11 @@ public class MatchDto
     public int GameNightId { get; set; }
     public int MatchTypeId { get; set; }
     public string MatchTypeName { get; set; } = string.Empty;
+    public int PlayersPerSide { get; set; }
     public int LegsWon { get; set; }
     public int LegsLost { get; set; }
     public bool Won { get; set; }
+    public int OrderIndex { get; set; }
     public List<int> PlayerIds { get; set; } = new();
     public List<PlayerMatchStatsDto> PlayerStats { get; set; } = new();
 }
@@ -37,11 +40,25 @@ public class MatchDto
 public class CreateMatchDto
 {
     public int MatchTypeId { get; set; }
+    public int OrderIndex { get; set; }
     public int LegsWon { get; set; }
     public int LegsLost { get; set; }
     public bool Won { get; set; }
     public List<int> PlayerIds { get; set; } = new();
     public List<CreatePlayerMatchStatsDto> PlayerStats { get; set; } = new();
+}
+
+public class UpdateMatchDto
+{
+    public int LegsWon { get; set; }
+    public int LegsLost { get; set; }
+    public List<int> PlayerIds { get; set; } = new();
+    public List<CreatePlayerMatchStatsDto> PlayerStats { get; set; } = new();
+}
+
+public class UpdateMotmDto
+{
+    public List<int> PlayerIds { get; set; } = new();
 }
 
 public class PlayerMatchStatsDto
