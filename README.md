@@ -1,13 +1,178 @@
-# System Design Document
-# Project: Team Match Recording & Statistics System
-# Target Runtime: .NET 10
-# Architecture: Blazor WebAssembly Hosted
-# Database: SQLite
-# Hosting Target: Azure App Service (Free Tier)
+# Dart Performance Tracker
+
+A web application for recording and analysing darts team match statistics.
+
+## Architecture
+
+```
+Frontend:  Blazor WebAssembly → GitHub Pages
+Backend:   Azure Functions (Consumption Plan, .NET 10 isolated)
+Database:  Azure SQL Database (serverless free tier)
+```
+
+### Solution Structure
+
+```
+src/
+  Client/     # Standalone Blazor WASM UI (deployed to GitHub Pages)
+  Functions/  # Azure Functions HTTP triggers (deployed to Azure)
+  Data/       # EF Core data layer — AppDbContext + Migrations (SQL Server)
+  Shared/     # DTOs and domain models shared by Client and Functions
+infrastructure/
+  main.bicep           # Azure resources (SQL, Functions, Storage)
+  parameters.prod.json # Production parameter values
+.github/workflows/
+  deploy.yml           # CI/CD: build → GitHub Pages + Azure Functions
+```
 
 ---
 
-# 1. SYSTEM OVERVIEW
+## Local Development
+
+### Prerequisites
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
+- SQL Server LocalDB (included with Visual Studio) **or** Docker
+
+### Option A — SQL Server LocalDB (Windows)
+
+LocalDB is installed with Visual Studio. Connection string:
+```
+Server=(localdb)\mssqllocaldb;Database=DartPerformanceTracker;Trusted_Connection=True;
+```
+
+### Option B — SQL Server via Docker (recommended, cross-platform)
+
+```bash
+docker run -e ACCEPT_EULA=Y -e SA_PASSWORD=YourStrong@Passw0rd \
+  -p 1433:1433 --name sqlserver \
+  mcr.microsoft.com/mssql/server:2022-latest
+```
+
+Connection string (pre-configured in `local.settings.json`):
+```
+Server=localhost,1433;Database=DartPerformanceTracker;User ID=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+```
+
+### Starting the Functions API
+
+```bash
+# Copy template and fill in your connection string
+cp src/Functions/local.settings.json.template src/Functions/local.settings.json
+
+# Apply EF Core migrations to LocalDB
+dotnet ef database update --project src/Data/DartPerformanceTracker.Data.csproj
+
+# Start the Functions host (API on http://localhost:7071)
+cd src/Functions && func start
+```
+
+### Starting the Blazor Client
+
+The client reads `ApiBaseUrl` from `wwwroot/appsettings.Development.json` (already set to `http://localhost:7071/api`).
+
+```bash
+dotnet run --project src/Client/DartPerformanceTracker.Client.csproj
+```
+
+---
+
+## Azure Deployment
+
+### 1. Provision Azure resources
+
+```bash
+az group create --name dart-tracker-rg --location uksouth
+
+az deployment group create \
+  --resource-group dart-tracker-rg \
+  --template-file infrastructure/main.bicep \
+  --parameters infrastructure/parameters.prod.json \
+  --parameters sqlAdminPassword="<your-password>"
+```
+
+The deployment outputs:
+- `functionAppName` — used as the `FUNCTION_APP_NAME` GitHub secret
+- `functionAppUrl` — the API base URL for the client
+
+### 2. Configure GitHub Secrets
+
+| Secret | Value |
+|--------|-------|
+| `AZURE_CREDENTIALS` | JSON output of `az ad sp create-for-rbac --sdk-auth` |
+| `AZURE_SQL_CONNECTION_STRING` | Full ADO.NET connection string to Azure SQL |
+| `FUNCTION_APP_NAME` | Function App name from Bicep output |
+
+### 3. Enable GitHub Pages
+
+In the repository settings, enable GitHub Pages with source set to **GitHub Actions**.
+
+### 4. Push to main
+
+Pushing to `main` triggers the CI/CD workflow which:
+1. Builds the solution
+2. Deploys the WASM client to GitHub Pages (`https://grantjmiles.github.io/dart-performance-tracker/`)
+3. Deploys Azure Functions to Azure
+
+---
+
+## Domain Model
+
+| Entity | Key Fields |
+|--------|-----------|
+| `Season` | Id, Name, StartDate, EndDate |
+| `Team` | Id, Name |
+| `Player` | Id, Name, TeamId, IsActive |
+| `MatchType` | Id, Name, PlayersPerSide |
+| `SeasonMatchConfiguration` | SeasonId, MatchTypeId, NumberOfMatches, OrderIndex |
+| `GameNight` | Id, SeasonId, Date, Opponent, IsHome, IsComplete |
+| `Match` | Id, GameNightId, MatchTypeId, LegsWon, LegsLost, Won, OrderIndex |
+| `MatchPlayer` | MatchId + PlayerId (composite PK) |
+| `PlayerMatchStats` | Id, MatchId, PlayerId, Tons, Maximums |
+| `ManOfTheMatch` | GameNightId + PlayerId (composite PK) |
+
+Match types seeded: Singles (1), Pairs (2), Triples (3), Fours (4), Sixes (6), Blind Pairs (2).
+
+---
+
+## API Endpoints
+
+All routes are prefixed with `/api`.
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/teams` | List all teams |
+| POST | `/teams` | Create team |
+| GET | `/teams/{id}` | Get team by ID |
+| GET | `/players` | List all players |
+| POST | `/players` | Create player |
+| GET | `/players/{id}` | Get player by ID |
+| GET | `/seasons` | List all seasons |
+| POST | `/seasons` | Create season |
+| GET | `/matchtypes` | List match types |
+| GET | `/gamenights/{id}` | Get game night |
+| GET | `/gamenights?incomplete=true` | List incomplete game nights |
+| POST | `/gamenights` | Create game night |
+| PATCH | `/gamenights/{id}/matches/{matchId}` | Update match result |
+| PATCH | `/gamenights/{id}/motm` | Set man of the match |
+| GET | `/dashboard/team/{seasonId}` | Team dashboard |
+| GET | `/dashboard/team/{teamId}/season/{seasonId}` | Team/season dashboard |
+| GET | `/dashboard/player/{playerId}` | Player dashboard |
+
+---
+
+## Cost
+
+| Resource | Plan | Monthly Cost |
+|----------|------|-------------|
+| Azure Functions | Consumption (first 1M free) | £0 |
+| Azure SQL Database | Serverless GP_S_Gen5_1 (auto-pause) | ~£0* |
+| Azure Storage | LRS (< 1 GB) | ~£0 |
+| GitHub Pages | Free | £0 |
+
+*Azure SQL free serverless tier: 100,000 vCore-seconds/month free. Auto-pauses after 1 hour idle.
+
 
 ## 1.1 Purpose
 

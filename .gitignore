@@ -3,3 +3,18 @@ bin/
 obj/
 *.user
 .vs/
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+
+# Azure Functions local settings (contains secrets)
+local.settings.json
+
+# Published output
+publish/
+publish-client/
+publish-functions/
+
+__*

@@ -3,8 +3,11 @@
   <Folder Name="/src/Client/">
     <Project Path="src/Client/DartPerformanceTracker.Client.csproj" />
   </Folder>
-  <Folder Name="/src/Server/">
-    <Project Path="src/Server/DartPerformanceTracker.Server.csproj" />
+  <Folder Name="/src/Data/">
+    <Project Path="src/Data/DartPerformanceTracker.Data.csproj" />
+  </Folder>
+  <Folder Name="/src/Functions/">
+    <Project Path="src/Functions/DartPerformanceTracker.Functions.csproj" />
   </Folder>
   <Folder Name="/src/Shared/">
     <Project Path="src/Shared/DartPerformanceTracker.Shared.csproj" />
