@@ -39,7 +39,7 @@
             {
                 <div class="d-flex align-items-center gap-2 mt-1">
                     <span class="small">vs @night.Opponent &mdash; @night.Date.ToString("dd MMM yyyy")</span>
-                    <a href="/matchday?id=@night.Id" class="btn btn-sm btn-warning py-0">Continue ▶</a>
+                    <a href="/dart-performance-tracker/matchday?id=@night.Id" class="btn btn-sm btn-warning py-0">Continue ▶</a>
                 </div>
             }
         </div>
@@ -58,7 +58,7 @@
             <div class="empty-icon">&#x1F3AF;</div>
             <h3>Welcome to Dart Tracker</h3>
             <p class="text-muted">Get started by adding a season, your team, and players in settings.</p>
-            <a href="/config" class="btn-accent"><i class="bi bi-gear-fill me-1"></i>Open Settings</a>
+            <a href="/dart-performance-tracker/config" class="btn-accent"><i class="bi bi-gear-fill me-1"></i>Open Settings</a>
         </div>
     }
     else if (seasons == null || !seasons.Any())
@@ -67,7 +67,7 @@
             <div class="empty-icon">&#x1F4C5;</div>
             <h3>No seasons yet</h3>
             <p class="text-muted">Add a season in settings to start tracking results.</p>
-            <a href="/config" class="btn-accent"><i class="bi bi-gear-fill me-1"></i>Open Settings</a>
+            <a href="/dart-performance-tracker/config" class="btn-accent"><i class="bi bi-gear-fill me-1"></i>Open Settings</a>
         </div>
     }
     else if (dashboard == null || dashboard.TotalGameNights == 0)
@@ -76,7 +76,7 @@
             <div class="empty-icon">&#x1F3AF;</div>
             <h3>No game nights yet</h3>
             <p class="text-muted">Record your first match night to start tracking results.</p>
-            <a href="/matchday" class="btn-accent"><i class="bi bi-file-earmark-text-fill me-1"></i>Enter Match Night</a>
+            <a href="/dart-performance-tracker/matchday" class="btn-accent"><i class="bi bi-file-earmark-text-fill me-1"></i>Enter Match Night</a>
         </div>
     }
     else
