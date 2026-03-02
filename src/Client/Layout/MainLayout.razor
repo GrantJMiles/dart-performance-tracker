@@ -1,20 +1,29 @@
 ﻿@inherits LayoutComponentBase
 
-<header class="app-header">
-    <NavLink href="" class="brand" Match="NavLinkMatch.All">
-        <span class="brand-icon">🎯</span>
-        <span class="brand-name">Dart Tracker</span>
-    </NavLink>
-    <div class="header-actions">
-        <NavLink href="matchday" class="icon-btn" title="Match Day Entry">
-            <i class="bi bi-file-earmark-text-fill"></i>
-        </NavLink>
-        <NavLink href="config" class="icon-btn" title="Settings">
-            <i class="bi bi-gear-fill"></i>
-        </NavLink>
-    </div>
-</header>
+<FluentDesignTheme StorageName="theme" />
 
-<main class="app-main">
-    @Body
-</main>
+<FluentLayout>
+    <FluentHeader>
+        <NavLink href="" class="brand" Match="NavLinkMatch.All">
+            <span class="brand-icon">🎯</span>
+            <span class="brand-name">Dart Tracker</span>
+        </NavLink>
+        <FluentSpacer />
+        <NavLink href="matchday" class="header-nav-link">
+            📋 Match Night
+        </NavLink>
+        <NavLink href="config" class="header-nav-link">
+            ⚙️ Settings
+        </NavLink>
+    </FluentHeader>
+    <FluentBodyContent>
+        <FluentStack HorizontalAlignment="HorizontalAlignment.Center" Style="width: 100%; padding: 0;">
+            <div class="app-content">
+                @Body
+            </div>
+        </FluentStack>
+    </FluentBodyContent>
+</FluentLayout>
+
+<FluentToastProvider />
+<FluentDialogProvider />

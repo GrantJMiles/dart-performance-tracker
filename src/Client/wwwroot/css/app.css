@@ -57,6 +57,67 @@ a:hover {
 }
 
 /* ============================================================
+   App Layout
+   ============================================================ */
+.app-content {
+    width: 100%;
+    max-width: var(--page-max-width);
+    padding: 0 1rem;
+}
+
+/* Brand link in FluentHeader */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none !important;
+    color: inherit;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.brand:hover {
+    text-decoration: none !important;
+}
+
+.brand-icon {
+    font-size: 1.4rem;
+}
+
+.brand-name {
+    font-weight: 700;
+}
+
+/* Navigation links in FluentHeader */
+.header-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none !important;
+    transition: background 0.15s;
+}
+
+.header-nav-link:hover,
+.header-nav-link.active {
+    background: rgba(255,255,255,0.12);
+    text-decoration: none !important;
+}
+
+/* Form label helper class */
+.form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-bottom: 0.25rem;
+}
+
+/* ============================================================
    Dashboard Page
    ============================================================ */
 .dashboard {
@@ -86,10 +147,6 @@ a:hover {
     flex-wrap: wrap;
 }
 
-.dashboard-selectors .form-select {
-    min-width: 130px;
-}
-
 /* Stat Cards */
 .stat-cards {
     display: grid;
@@ -110,17 +167,9 @@ a:hover {
     gap: 0.25rem;
 }
 
-.stat-card.won {
-    border-top-color: var(--color-won);
-}
-
-.stat-card.lost {
-    border-top-color: var(--color-lost);
-}
-
-.stat-card.drawn {
-    border-top-color: var(--color-drawn);
-}
+.stat-card.won { border-top-color: var(--color-won); }
+.stat-card.lost { border-top-color: var(--color-lost); }
+.stat-card.drawn { border-top-color: var(--color-drawn); }
 
 .stat-value {
     font-size: 2.25rem;
@@ -206,17 +255,9 @@ a:hover {
     color: white;
 }
 
-.badge-won {
-    background: var(--color-won);
-}
-
-.badge-lost {
-    background: var(--color-lost);
-}
-
-.badge-drawn {
-    background: var(--color-drawn);
-}
+.badge-won { background: var(--color-won); }
+.badge-lost { background: var(--color-lost); }
+.badge-drawn { background: var(--color-drawn); }
 
 /* Empty / Loading state */
 .empty-state {
@@ -261,9 +302,10 @@ a:hover {
 
 .config-section {
     background: var(--color-surface);
-    border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+    border-radius: var(--radius-md);
     padding: 1.5rem;
     box-shadow: var(--shadow-sm);
+    margin-top: 0.5rem;
 }
 
 .config-table {
@@ -302,65 +344,8 @@ a:hover {
 }
 
 /* ============================================================
-   Forms (global overrides)
+   Validation
    ============================================================ */
-.form-control,
-.form-select {
-    border-color: var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-size: 0.9rem;
-}
-
-.form-control:focus,
-.form-select:focus {
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
-}
-
-.form-label {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--color-text-muted);
-    margin-bottom: 0.25rem;
-}
-
-.btn-primary {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: white;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.btn-primary:hover,
-.btn-primary:focus {
-    background: var(--color-accent-hover);
-    border-color: var(--color-accent-hover);
-    color: white;
-}
-
-.btn-accent {
-    display: inline-block;
-    background: var(--color-accent);
-    color: white !important;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 0.5rem 1.25rem;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    text-decoration: none !important;
-    margin-top: 1rem;
-    transition: background 0.15s;
-}
-
-.btn-accent:hover {
-    background: var(--color-accent-hover);
-    text-decoration: none !important;
-}
-
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid var(--color-accent);
 }
@@ -372,35 +357,6 @@ a:hover {
 .validation-message {
     color: var(--color-lost);
     font-size: 0.8rem;
-}
-
-/* ============================================================
-   Nav Tabs override
-   ============================================================ */
-.nav-tabs {
-    border-bottom: 1px solid var(--color-border);
-}
-
-.nav-tabs .nav-link {
-    color: var(--color-text-muted);
-    font-weight: 500;
-    border: none;
-    border-bottom: 2px solid transparent;
-    border-radius: 0;
-    padding: 0.625rem 1rem;
-    background: none;
-    transition: color 0.15s, border-color 0.15s;
-}
-
-.nav-tabs .nav-link:hover {
-    color: var(--color-text);
-    border-bottom-color: var(--color-border);
-}
-
-.nav-tabs .nav-link.active {
-    color: var(--color-accent);
-    border-bottom-color: var(--color-accent);
-    background: none;
 }
 
 /* ============================================================
@@ -491,13 +447,14 @@ a:hover {
 }
 
 /* ============================================================
-   Stats Carousel (pure Blazor)
+   Stats Carousel
    ============================================================ */
 .stats-carousel-card {
     background: var(--color-surface);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+    margin-bottom: 1.5rem;
 }
 
 .stats-carousel-header {
@@ -516,27 +473,6 @@ a:hover {
     letter-spacing: 0.06em;
     text-align: center;
     flex: 1;
-}
-
-.carousel-nav-btn {
-    background: none;
-    border: none;
-    font-size: 1.75rem;
-    line-height: 1;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    padding: 0 0.25rem;
-    transition: color 0.15s;
-    width: 2rem;
-}
-
-.carousel-nav-btn:hover:not(:disabled) {
-    color: var(--color-text);
-}
-
-.carousel-nav-btn:disabled {
-    opacity: 0.25;
-    cursor: default;
 }
 
 .carousel-dots {
@@ -567,56 +503,17 @@ a:hover {
 }
 
 /* MVP display */
-.mvp-display {
-    text-align: center;
-}
-
-.mvp-trophy {
-    font-size: 2rem;
-    margin-bottom: 0.25rem;
-}
-
-.mvp-player-name {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: 0.25rem;
-}
-
-.mvp-stat-primary {
-    font-size: 1rem;
-    color: var(--color-accent, #6366f1);
-    font-weight: 600;
-    margin-bottom: 0.2rem;
-}
-
-.mvp-stat-secondary {
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-}
+.mvp-display { text-align: center; }
+.mvp-trophy { font-size: 2rem; margin-bottom: 0.25rem; }
+.mvp-player-name { font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem; }
+.mvp-stat-primary { font-size: 1rem; color: var(--color-accent, #6366f1); font-weight: 600; margin-bottom: 0.2rem; }
+.mvp-stat-secondary { font-size: 0.8rem; color: var(--color-text-muted); }
 
 /* Empty state inside carousel */
-.carousel-empty-state {
-    text-align: center;
-    color: var(--color-text-muted);
-}
-
-.carousel-empty-state p {
-    margin: 0.25rem 0 0;
-    font-size: 0.9rem;
-}
-
-.carousel-empty-icon {
-    font-size: 1.75rem;
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
-.carousel-empty-hint {
-    font-size: 0.75rem !important;
-    color: var(--color-text-muted);
-    margin-top: 0.25rem !important;
-}
+.carousel-empty-state { text-align: center; color: var(--color-text-muted); }
+.carousel-empty-state p { margin: 0.25rem 0 0; font-size: 0.9rem; }
+.carousel-empty-icon { font-size: 1.75rem; display: block; margin-bottom: 0.25rem; }
+.carousel-empty-hint { font-size: 0.75rem !important; color: var(--color-text-muted); margin-top: 0.25rem !important; }
 
 /* Form badge with hover tooltip */
 .form-badge-wrapper {
@@ -696,43 +593,13 @@ a:hover {
     border-color: var(--color-accent);
 }
 
-.score-btn.win.selected {
-    background: var(--color-won);
-    border-color: var(--color-won);
-    color: white;
-}
+.score-btn.win.selected { background: var(--color-won); border-color: var(--color-won); color: white; }
+.score-btn.win-close.selected { background: #34d399; border-color: #34d399; color: white; }
+.score-btn.loss-close.selected { background: #f87171; border-color: #f87171; color: white; }
+.score-btn.loss.selected { background: var(--color-lost); border-color: var(--color-lost); color: white; }
 
-.score-btn.win-close.selected {
-    background: #34d399;
-    border-color: #34d399;
-    color: white;
-}
-
-.score-btn.loss-close.selected {
-    background: #f87171;
-    border-color: #f87171;
-    color: white;
-}
-
-.score-btn.loss.selected {
-    background: var(--color-lost);
-    border-color: var(--color-lost);
-    color: white;
-}
-
-.score-btn-label {
-    font-size: 1.25rem;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.score-btn-sublabel {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 0.85;
-}
+.score-btn-label { font-size: 1.25rem; font-weight: 700; line-height: 1; }
+.score-btn-sublabel { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85; }
 
 /* ============================================================
    Match Entry — Stat Steppers
@@ -746,15 +613,8 @@ a:hover {
     flex-wrap: wrap;
 }
 
-.stat-row:last-child {
-    border-bottom: none;
-}
-
-.stat-player-name {
-    font-weight: 600;
-    flex: 1;
-    min-width: 100px;
-}
+.stat-row:last-child { border-bottom: none; }
+.stat-player-name { font-weight: 600; flex: 1; min-width: 100px; }
 
 .stat-stepper-group {
     display: flex;
@@ -763,18 +623,11 @@ a:hover {
     gap: 0.2rem;
 }
 
-.stat-stepper-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-text-muted);
-}
+.stat-stepper-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); }
 
 .stat-stepper {
     display: flex;
     align-items: center;
-    gap: 0;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     overflow: hidden;
@@ -796,17 +649,8 @@ a:hover {
     justify-content: center;
 }
 
-.stepper-btn:hover {
-    background: var(--color-border);
-}
-
-.stepper-value {
-    min-width: 36px;
-    text-align: center;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--color-text);
-}
+.stepper-btn:hover { background: var(--color-border); }
+.stepper-value { min-width: 36px; text-align: center; font-size: 1rem; font-weight: 700; color: var(--color-text); }
 
 /* ============================================================
    Player Selector — Avatar Grid
@@ -832,21 +676,9 @@ a:hover {
     position: relative;
 }
 
-.player-card:hover:not(.disabled) {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--color-accent);
-}
-
-.player-card.selected {
-    border-color: var(--color-accent);
-    background: var(--color-accent-muted);
-}
-
-.player-card.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
+.player-card:hover:not(.disabled) { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--color-accent); }
+.player-card.selected { border-color: var(--color-accent); background: var(--color-accent-muted); }
+.player-card.disabled { opacity: 0.4; cursor: not-allowed; }
 
 .player-avatar {
     width: 44px;
@@ -861,10 +693,7 @@ a:hover {
     justify-content: center;
 }
 
-.player-card.selected .player-avatar {
-    background: var(--color-accent);
-    color: white;
-}
+.player-card.selected .player-avatar { background: var(--color-accent); color: white; }
 
 .player-name {
     font-size: 0.75rem;
@@ -877,17 +706,8 @@ a:hover {
     white-space: nowrap;
 }
 
-.player-check {
-    position: absolute;
-    top: 4px;
-    right: 6px;
-    font-size: 0.7rem;
-    color: var(--color-accent);
-    font-weight: 700;
-}
+.player-check { position: absolute; top: 4px; right: 6px; font-size: 0.7rem; color: var(--color-accent); font-weight: 700; }
 
 @media (max-width: 400px) {
-    .score-picker {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .score-picker { grid-template-columns: repeat(2, 1fr); }
 }

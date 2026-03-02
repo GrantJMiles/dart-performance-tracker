@@ -6,28 +6,26 @@
 
 @if (dashboard == null)
 {
-    <p>Loading...</p>
+    <FluentProgressRing />
 }
 else
 {
     <h4>@dashboard.PlayerName - @dashboard.TeamName</h4>
-    <div class="row mb-3">
-        <div class="col"><strong>Matches Played:</strong> @dashboard.MatchesPlayed</div>
-        <div class="col"><strong>Won:</strong> @dashboard.MatchesWon</div>
-        <div class="col"><strong>Lost:</strong> @dashboard.MatchesLost</div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+        <FluentCard><div><strong>Matches Played:</strong> @dashboard.MatchesPlayed</div></FluentCard>
+        <FluentCard><div><strong>Won:</strong> @dashboard.MatchesWon</div></FluentCard>
+        <FluentCard><div><strong>Lost:</strong> @dashboard.MatchesLost</div></FluentCard>
     </div>
-    <div class="row mb-3">
-        <div class="col"><strong>Total Tons:</strong> @dashboard.TotalTons</div>
-        <div class="col"><strong>Total Maximums:</strong> @dashboard.TotalMaximums</div>
-        <div class="col"><strong>Man of the Match:</strong> @dashboard.ManOfTheMatchCount</div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+        <FluentCard><div><strong>Total Tons:</strong> @dashboard.TotalTons</div></FluentCard>
+        <FluentCard><div><strong>Total Maximums:</strong> @dashboard.TotalMaximums</div></FluentCard>
+        <FluentCard><div><strong>Man of the Match:</strong> @dashboard.ManOfTheMatchCount</div></FluentCard>
     </div>
     @if (dashboard.TopTeammate != null)
     {
-        <div class="row mb-3">
-            <div class="col">
-                <strong>Top Teammate:</strong> @dashboard.TopTeammate.PlayerName
-                (@dashboard.TopTeammate.GamesPlayedTogether played, @dashboard.TopTeammate.WinsTogether wins together)
-            </div>
+        <div style="margin-bottom: 1rem;">
+            <strong>Top Teammate:</strong> @dashboard.TopTeammate.PlayerName
+            (@dashboard.TopTeammate.GamesPlayedTogether played, @dashboard.TopTeammate.WinsTogether wins together)
         </div>
     }
     <StatsSummaryComponent Label="Recent Matches" Items="recentMatchItems" />

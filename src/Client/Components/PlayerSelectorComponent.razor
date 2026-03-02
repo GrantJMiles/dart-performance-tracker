@@ -1,7 +1,7 @@
 @using DartPerformanceTracker.Shared.DTOs
 
 <div>
-    <label class="form-label">@Label</label>
+    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">@Label</label>
     <div class="player-grid">
         @foreach (var player in Players.Where(p => p.IsActive))
         {

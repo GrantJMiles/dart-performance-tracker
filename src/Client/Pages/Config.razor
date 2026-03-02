@@ -3,27 +3,13 @@
 <PageTitle>Configuration – Dart Tracker</PageTitle>
 
 <div class="config-page">
-    <h1 class="page-title">
-        <i class="bi bi-gear-fill me-2"></i>Configuration
-    </h1>
+    <h1 class="page-title">⚙️ Configuration</h1>
 
-    <ul class="nav nav-tabs mb-0">
-        <li class="nav-item">
-            <button class="nav-link @(activeTab == "seasons" ? "active" : "")" @onclick='() => SetTab("seasons")'>
-                <i class="bi bi-calendar3 me-1"></i>Seasons
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link @(activeTab == "teams" ? "active" : "")" @onclick='() => SetTab("teams")'>
-                <i class="bi bi-people-fill me-1"></i>Teams
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link @(activeTab == "players" ? "active" : "")" @onclick='() => SetTab("players")'>
-                <i class="bi bi-person-fill me-1"></i>Players
-            </button>
-        </li>
-    </ul>
+    <FluentTabs ActiveTabId="@activeTab" ActiveTabIdChanged="@(id => SetTab(id))">
+        <FluentTab Id="seasons">📅 Seasons</FluentTab>
+        <FluentTab Id="teams">👥 Teams</FluentTab>
+        <FluentTab Id="players">👤 Players</FluentTab>
+    </FluentTabs>
 
     <div class="config-section">
 
@@ -33,7 +19,7 @@
 
             @if (seasons == null)
             {
-                <p class="text-muted">Loading...</p>
+                <FluentProgressRing />
             }
             else if (seasons.Any())
             {
@@ -55,7 +41,7 @@
                                 <td>@season.StartDate.ToShortDateString()</td>
                                 <td>@season.EndDate.ToShortDateString()</td>
                                 <td>@season.MaximumScore</td>
-                                <td class="text-muted small">@season.MatchConfigurations.Count slots</td>
+                                <td style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">@season.MatchConfigurations.Count slots</td>
                             </tr>
                         }
                     </tbody>
@@ -63,87 +49,88 @@
             }
             else
             {
-                <p class="text-muted small">No seasons yet. Add one below.</p>
+                <p style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">No seasons yet. Add one below.</p>
             }
 
-            <hr class="my-3" />
+            <FluentDivider Style="margin: 1rem 0;" />
             <p class="section-title">Add Season</p>
             <EditForm Model="newSeason" OnValidSubmit="AddSeason">
                 <DataAnnotationsValidator />
                 <div class="config-form-row">
                     <div>
-                        <label class="form-label">Name</label>
-                        <InputText class="form-control" @bind-Value="newSeason.Name" placeholder="e.g. 2025/26" />
+                        <FluentTextField @bind-Value="newSeason.Name" Label="Name" Placeholder="e.g. 2025/26" style="width: 100%;" />
                     </div>
                     <div>
                         <label class="form-label">Start Date</label>
-                        <InputDate class="form-control" @bind-Value="newSeason.StartDate" />
+                        <FluentDatePicker Value="@((DateTime?)newSeason.StartDate)"
+                                          ValueChanged="@(v => newSeason.StartDate = v ?? DateTime.Today)"
+                                          style="width: 100%;" />
                     </div>
                     <div>
                         <label class="form-label">End Date</label>
-                        <InputDate class="form-control" @bind-Value="newSeason.EndDate" />
+                        <FluentDatePicker Value="@((DateTime?)newSeason.EndDate)"
+                                          ValueChanged="@(v => newSeason.EndDate = v ?? DateTime.Today)"
+                                          style="width: 100%;" />
                     </div>
                     <div>
-                        <label class="form-label">Maximum Score</label>
-                        <InputNumber class="form-control" @bind-Value="newSeason.MaximumScore" />
-                        <div class="form-text">e.g. 180 (standard), 170 (cricket/bull)</div>
+                        <FluentNumberField @bind-Value="newSeason.MaximumScore" Label="Maximum Score" style="width: 100%;" />
+                        <div style="font-size: 0.8rem; color: var(--neutral-foreground-hint);">e.g. 180 (standard), 170 (cricket/bull)</div>
                     </div>
                 </div>
 
-                <div class="mt-3">
-                    <label class="form-label fw-semibold">Match Format</label>
-                    <p class="text-muted small mb-2">Build the playing order for this season. Each entry = one match on the night.</p>
+                <div style="margin-top: 1rem;">
+                    <label class="form-label" style="font-weight: 600;">Match Format</label>
+                    <p style="color: var(--neutral-foreground-hint); font-size: 0.875rem; margin-bottom: 0.5rem;">Build the playing order for this season. Each entry = one match on the night.</p>
                     @if (matchTypes != null && matchTypes.Any())
                     {
-                        <div class="d-flex gap-2 mb-2">
-                            <select class="form-select form-select-sm" style="max-width: 260px;" @bind="selectedMatchTypeId">
-                                <option value="0">-- Select Match Type --</option>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: flex-end;">
+                            <FluentSelect TOption="string" Value="@selectedMatchTypeId.ToString()"
+                                          ValueChanged="@(v => selectedMatchTypeId = int.TryParse(v, out var id) ? id : 0)"
+                                          style="max-width: 280px;">
+                                <FluentOption Value="@("0")">-- Select Match Type --</FluentOption>
                                 @foreach (var mt in matchTypes)
                                 {
-                                    <option value="@mt.Id">@mt.Name (@mt.PlayersPerSide v @mt.PlayersPerSide)</option>
+                                    <FluentOption Value="@mt.Id.ToString()">@mt.Name (@mt.PlayersPerSide v @mt.PlayersPerSide)</FluentOption>
                                 }
-                            </select>
-                            <button type="button" class="btn btn-sm btn-secondary" @onclick="AddMatchSlot"
-                                    disabled="@(selectedMatchTypeId == 0)">
+                            </FluentSelect>
+                            <FluentButton Appearance="Appearance.Outline" @onclick="AddMatchSlot"
+                                          Disabled="@(selectedMatchTypeId == 0)">
                                 + Add
-                            </button>
+                            </FluentButton>
                         </div>
 
                         @if (newSeason.MatchConfigurations.Any())
                         {
-                            <div class="list-group mb-3" style="max-width: 420px;">
+                            <div style="max-width: 420px; margin-bottom: 1rem;">
                                 @for (int i = 0; i < newSeason.MatchConfigurations.Count; i++)
                                 {
                                     var idx = i;
                                     var mtName = matchTypes.FirstOrDefault(mt => mt.Id == newSeason.MatchConfigurations[idx].MatchTypeId)?.Name ?? "Unknown";
-                                    <div class="list-group-item d-flex align-items-center gap-2 py-1 px-2">
-                                        <span class="text-muted small" style="min-width: 24px;">@(idx + 1).</span>
-                                        <span class="flex-grow-1 small">@mtName</span>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1"
-                                                @onclick="() => MoveMatchSlotUp(idx)"
-                                                disabled="@(idx == 0)" title="Move up">▲</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1"
-                                                @onclick="() => MoveMatchSlotDown(idx)"
-                                                disabled="@(idx == newSeason.MatchConfigurations.Count - 1)" title="Move down">▼</button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1"
-                                                @onclick="() => RemoveMatchSlot(idx)" title="Remove">✕</button>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.5rem; border: 1px solid var(--neutral-stroke-rest); border-radius: 4px; margin-bottom: 4px;">
+                                        <span style="color: var(--neutral-foreground-hint); font-size: 0.875rem; min-width: 24px;">@(idx + 1).</span>
+                                        <span style="flex-grow: 1; font-size: 0.875rem;">@mtName</span>
+                                        <FluentButton Appearance="Appearance.Stealth" @onclick="() => MoveMatchSlotUp(idx)"
+                                                      Disabled="@(idx == 0)" title="Move up" style="padding: 0 4px;">▲</FluentButton>
+                                        <FluentButton Appearance="Appearance.Stealth" @onclick="() => MoveMatchSlotDown(idx)"
+                                                      Disabled="@(idx == newSeason.MatchConfigurations.Count - 1)" title="Move down" style="padding: 0 4px;">▼</FluentButton>
+                                        <FluentButton Appearance="Appearance.Stealth" @onclick="() => RemoveMatchSlot(idx)" title="Remove" style="padding: 0 4px; color: var(--error);">✕</FluentButton>
                                     </div>
                                 }
                             </div>
                         }
                         else
                         {
-                            <p class="text-muted small">No matches added yet.</p>
+                            <p style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">No matches added yet.</p>
                         }
                     }
                     else
                     {
-                        <p class="text-muted small">Loading match types...</p>
+                        <p style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">Loading match types...</p>
                     }
                 </div>
 
-                <div class="mt-2">
-                    <button type="submit" class="btn btn-primary">Add Season</button>
+                <div style="margin-top: 0.5rem;">
+                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Add Season</FluentButton>
                 </div>
             </EditForm>
         }
@@ -154,7 +141,7 @@
 
             @if (teams == null)
             {
-                <p class="text-muted">Loading...</p>
+                <FluentProgressRing />
             }
             else if (teams.Any())
             {
@@ -172,20 +159,19 @@
             }
             else
             {
-                <p class="text-muted small">No teams yet. Add one below.</p>
+                <p style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">No teams yet. Add one below.</p>
             }
 
-            <hr class="my-3" />
+            <FluentDivider Style="margin: 1rem 0;" />
             <p class="section-title">Add Team</p>
             <EditForm Model="newTeam" OnValidSubmit="AddTeam">
                 <DataAnnotationsValidator />
                 <div class="config-form-row">
                     <div>
-                        <label class="form-label">Name</label>
-                        <InputText class="form-control" @bind-Value="newTeam.Name" placeholder="e.g. The Arrows" />
+                        <FluentTextField @bind-Value="newTeam.Name" Label="Name" Placeholder="e.g. The Arrows" style="width: 100%;" />
                     </div>
-                    <div class="d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Add Team</button>
+                    <div style="display: flex; align-items: flex-end;">
+                        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" style="width: 100%;">Add Team</FluentButton>
                     </div>
                 </div>
             </EditForm>
@@ -197,7 +183,7 @@
 
             @if (players == null)
             {
-                <p class="text-muted">Loading...</p>
+                <FluentProgressRing />
             }
             else if (players.Any())
             {
@@ -218,11 +204,11 @@
                                 <td>
                                     @if (player.IsActive)
                                     {
-                                        <span class="badge bg-success">Active</span>
+                                        <FluentBadge Appearance="Appearance.Accent">Active</FluentBadge>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary">Inactive</span>
+                                        <FluentBadge>Inactive</FluentBadge>
                                     }
                                 </td>
                             </tr>
@@ -232,34 +218,34 @@
             }
             else
             {
-                <p class="text-muted small">No players yet. Add one below.</p>
+                <p style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">No players yet. Add one below.</p>
             }
 
-            <hr class="my-3" />
+            <FluentDivider Style="margin: 1rem 0;" />
             <p class="section-title">Add Player</p>
             <EditForm Model="newPlayer" OnValidSubmit="AddPlayer">
                 <DataAnnotationsValidator />
                 <div class="config-form-row">
                     <div>
-                        <label class="form-label">Name</label>
-                        <InputText class="form-control" @bind-Value="newPlayer.Name" placeholder="Player name" />
+                        <FluentTextField @bind-Value="newPlayer.Name" Label="Name" Placeholder="Player name" style="width: 100%;" />
                     </div>
                     <div>
                         <label class="form-label">Team</label>
-                        <InputSelect class="form-control" @bind-Value="newPlayer.TeamId">
-                            <option value="0">-- Select Team --</option>
+                        <FluentSelect TOption="string" Value="@newPlayer.TeamId.ToString()"
+                                      ValueChanged="@(v => newPlayer.TeamId = int.TryParse(v, out var id) ? id : 0)"
+                                      style="width: 100%;">
+                            <FluentOption Value="@("0")">-- Select Team --</FluentOption>
                             @foreach (var team in teams ?? new List<TeamDto>())
                             {
-                                <option value="@team.Id">@team.Name</option>
+                                <FluentOption Value="@team.Id.ToString()">@team.Name</FluentOption>
                             }
-                        </InputSelect>
+                        </FluentSelect>
                     </div>
-                    <div class="d-flex align-items-center gap-2" style="padding-top: 1.5rem;">
-                        <InputCheckbox class="form-check-input mt-0" @bind-Value="newPlayer.IsActive" id="playerActive" />
-                        <label class="form-check-label" for="playerActive">Active</label>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; padding-top: 1.5rem;">
+                        <FluentCheckbox @bind-Value="newPlayer.IsActive" Label="Active" />
                     </div>
-                    <div class="d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Add Player</button>
+                    <div style="display: flex; align-items: flex-end;">
+                        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" style="width: 100%;">Add Player</FluentButton>
                     </div>
                 </div>
             </EditForm>
@@ -288,9 +274,9 @@
         await Task.WhenAll(LoadSeasons(), LoadTeams(), LoadPlayers(), LoadMatchTypes());
     }
 
-    private void SetTab(string tab)
+    private void SetTab(string? tab)
     {
-        activeTab = tab;
+        if (tab != null) activeTab = tab;
     }
 
     private async Task LoadSeasons() =>

@@ -11,59 +11,57 @@
 {
     <h3>New Match Night</h3>
 
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="mb-3">
-                <label class="form-label">Season</label>
-                <select class="form-select" @onchange="OnSeasonChanged">
-                    <option value="0">-- Select Season --</option>
-                    @foreach (var season in seasons)
-                    {
-                        <option value="@season.Id">@season.Name</option>
-                    }
-                </select>
-            </div>
-            @if (selectedSeason != null)
-            {
-                <div class="mb-3">
-                    <label class="form-label">Date</label>
-                    <InputDate class="form-control" @bind-Value="setupDate" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Opponent</label>
-                    <InputText class="form-control" @bind-Value="setupOpponent" placeholder="Opponent team name" />
-                </div>
-                <div class="mb-3 form-check">
-                    <InputCheckbox class="form-check-input" @bind-Value="setupIsHome" id="isHome" />
-                    <label class="form-check-label" for="isHome">Home Game</label>
-                </div>
-                <div class="mb-3">
-                    <p class="text-muted small mb-1">
-                        <strong>@orderedConfigs.Count matches</strong> in this season's format:
-                        @string.Join(", ", orderedConfigs.Select(c => c.MatchTypeName))
-                    </p>
-                </div>
-                <button class="btn btn-primary" @onclick="BeginMatchNight" disabled="@(saving || string.IsNullOrWhiteSpace(setupOpponent))">
-                    @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
-                    Begin Match Night
-                </button>
-            }
+    <FluentCard Style="margin-bottom: 1rem; padding: 1rem;">
+        <div style="margin-bottom: 1rem;">
+            <label class="form-label">Season</label>
+            <FluentSelect TOption="string" Value="@(selectedSeason?.Id.ToString() ?? "0")"
+                          ValueChanged="@OnSeasonChanged"
+                          style="width: 100%;">
+                <FluentOption Value="@("0")">-- Select Season --</FluentOption>
+                @foreach (var season in seasons)
+                {
+                    <FluentOption Value="@season.Id.ToString()">@season.Name</FluentOption>
+                }
+            </FluentSelect>
         </div>
-    </div>
+        @if (selectedSeason != null)
+        {
+            <div style="margin-bottom: 1rem;">
+                <label class="form-label">Date</label>
+                <FluentDatePicker Value="@((DateTime?)setupDate)"
+                                  ValueChanged="@(v => setupDate = v ?? DateTime.Today)"
+                                  style="width: 100%;" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <FluentTextField @bind-Value="setupOpponent" Label="Opponent" Placeholder="Opponent team name" style="width: 100%;" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <FluentCheckbox @bind-Value="setupIsHome" Label="Home Game" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <p style="color: var(--neutral-foreground-hint); font-size: 0.875rem; margin-bottom: 0.25rem;">
+                    <strong>@orderedConfigs.Count matches</strong> in this season's format:
+                    @string.Join(", ", orderedConfigs.Select(c => c.MatchTypeName))
+                </p>
+            </div>
+            <FluentButton Appearance="Appearance.Accent" @onclick="BeginMatchNight"
+                          Disabled="@(saving || string.IsNullOrWhiteSpace(setupOpponent))">
+                @if (saving) { <FluentProgressRing Style="width: 16px; height: 16px; margin-right: 4px;" /> }
+                Begin Match Night
+            </FluentButton>
+        }
+    </FluentCard>
 }
 else if (step == Step.Matches && createdGameNight != null)
 {
     var config = orderedConfigs[currentMatchIndex];
 
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <h3 class="mb-0">Match @(currentMatchIndex + 1) of @totalMatches</h3>
-        <span class="badge bg-secondary fs-6">vs @createdGameNight.Opponent &mdash; @createdGameNight.Date.ToString("dd MMM yyyy")</span>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+        <h3 style="margin: 0;">Match @(currentMatchIndex + 1) of @totalMatches</h3>
+        <FluentBadge>vs @createdGameNight.Opponent &mdash; @createdGameNight.Date.ToString("dd MMM yyyy")</FluentBadge>
     </div>
 
-    <div class="progress mb-3" style="height: 6px;">
-        <div class="progress-bar" role="progressbar"
-             style="width: @(((currentMatchIndex) * 100) / totalMatches)%"></div>
-    </div>
+    <FluentProgress Min="0" Max="@totalMatches" Value="@currentMatchIndex" Style="margin-bottom: 1rem;" />
 
     <MatchEntryComponent
         Config="config"
@@ -74,95 +72,89 @@ else if (step == Step.Matches && createdGameNight != null)
 
     @if (!string.IsNullOrEmpty(message))
     {
-        <div class="alert alert-danger mt-2">@message</div>
+        <FluentMessageBar Intent="MessageIntent.Error" Style="margin-top: 0.5rem;">@message</FluentMessageBar>
     }
 
-    <div class="d-flex gap-2 mt-2">
+    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
         @if (currentMatchIndex > 0)
         {
-            <button class="btn btn-outline-secondary" @onclick="GoToPrevious">◀ Previous</button>
+            <FluentButton Appearance="Appearance.Outline" @onclick="GoToPrevious">◀ Previous</FluentButton>
         }
-        <button class="btn btn-primary ms-auto" @onclick="SaveAndContinue" disabled="@saving">
-            @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+        <FluentButton Appearance="Appearance.Accent" Style="margin-left: auto;" @onclick="SaveAndContinue" Disabled="@saving">
+            @if (saving) { <FluentProgressRing Style="width: 16px; height: 16px; margin-right: 4px;" /> }
             @(currentMatchIndex == totalMatches - 1 ? "Save & Review" : "Save & Continue ▶")
-        </button>
+        </FluentButton>
     </div>
 }
 else if (step == Step.Review && createdGameNight != null)
 {
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <h3 class="mb-0">Review &amp; Player of the Match</h3>
-        <span class="badge bg-secondary fs-6">vs @createdGameNight.Opponent &mdash; @createdGameNight.Date.ToString("dd MMM yyyy")</span>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+        <h3 style="margin: 0;">Review &amp; Player of the Match</h3>
+        <FluentBadge>vs @createdGameNight.Opponent &mdash; @createdGameNight.Date.ToString("dd MMM yyyy")</FluentBadge>
     </div>
 
-    <div class="progress mb-3" style="height: 6px;">
-        <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
-    </div>
+    <FluentProgress Min="0" Max="@totalMatches" Value="@totalMatches" Style="margin-bottom: 1rem;" />
 
     @foreach (var (match, idx) in createdGameNight.Matches.Select((m, i) => (m, i)))
     {
         var cfg = idx < orderedConfigs.Count ? orderedConfigs[idx] : null;
-        <div class="card mb-2">
-            <div class="card-header d-flex justify-content-between align-items-center py-2">
+        <FluentCard Style="margin-bottom: 0.5rem; padding: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                 <span><strong>Match @(idx + 1)</strong> &mdash; @match.MatchTypeName</span>
-                <span class="badge @(match.Won ? "bg-success" : "bg-danger")">
+                <FluentBadge Appearance="@(match.Won ? Appearance.Accent : Appearance.Neutral)">
                     @match.LegsWon &ndash; @match.LegsLost @(match.Won ? "W" : "L")
-                </span>
+                </FluentBadge>
             </div>
             @if (match.PlayerIds.Any())
             {
-                <div class="card-body py-2">
-                    @foreach (var playerId in match.PlayerIds)
-                    {
-                        var playerName = players.FirstOrDefault(p => p.Id == playerId)?.Name ?? playerId.ToString();
-                        var stats = match.PlayerStats.FirstOrDefault(s => s.PlayerId == playerId);
-                        <div class="d-flex gap-3 align-items-center small">
-                            <span class="fw-semibold" style="min-width: 120px;">@playerName</span>
-                            @if (stats != null)
-                            {
-                                <span class="text-muted">Tons: <strong>@stats.Tons</strong></span>
-                                <span class="text-muted">180s: <strong>@stats.Maximums</strong></span>
-                            }
-                        </div>
-                    }
-                </div>
+                @foreach (var playerId in match.PlayerIds)
+                {
+                    var playerName = players.FirstOrDefault(p => p.Id == playerId)?.Name ?? playerId.ToString();
+                    var stats = match.PlayerStats.FirstOrDefault(s => s.PlayerId == playerId);
+                    <div style="display: flex; gap: 0.75rem; align-items: center; font-size: 0.875rem;">
+                        <span style="font-weight: 600; min-width: 120px;">@playerName</span>
+                        @if (stats != null)
+                        {
+                            <span style="color: var(--neutral-foreground-hint);">Tons: <strong>@stats.Tons</strong></span>
+                            <span style="color: var(--neutral-foreground-hint);">180s: <strong>@stats.Maximums</strong></span>
+                        }
+                    </div>
+                }
             }
-        </div>
+        </FluentCard>
     }
 
-    <div class="card mt-3">
-        <div class="card-header"><strong>Player of the Match</strong></div>
-        <div class="card-body">
-            <PlayerSelectorComponent
-                Players="players"
-                SelectedPlayerIds="motmPlayerIds"
-                Label="Select player(s) of the match"
-                Prefix="motm" />
-        </div>
-    </div>
+    <FluentCard Style="margin-top: 1rem; padding: 0.75rem;">
+        <p style="font-weight: 600; margin-bottom: 0.5rem;">Player of the Match</p>
+        <PlayerSelectorComponent
+            Players="players"
+            SelectedPlayerIds="motmPlayerIds"
+            Label="Select player(s) of the match"
+            Prefix="motm" />
+    </FluentCard>
 
     @if (!string.IsNullOrEmpty(message))
     {
-        <div class="alert alert-danger mt-2">@message</div>
+        <FluentMessageBar Intent="MessageIntent.Error" Style="margin-top: 0.5rem;">@message</FluentMessageBar>
     }
 
-    <div class="d-flex gap-2 mt-3">
-        <button class="btn btn-outline-secondary" @onclick="BackToLastMatch">◀ Back to Matches</button>
-        <button class="btn btn-success ms-auto" @onclick="FinalSave" disabled="@saving">
-            @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
-            &#x2714; Final Save
-        </button>
+    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+        <FluentButton Appearance="Appearance.Outline" @onclick="BackToLastMatch">◀ Back to Matches</FluentButton>
+        <FluentButton Appearance="Appearance.Accent" Style="margin-left: auto;" @onclick="FinalSave" Disabled="@saving">
+            @if (saving) { <FluentProgressRing Style="width: 16px; height: 16px; margin-right: 4px;" /> }
+            ✔ Final Save
+        </FluentButton>
     </div>
 }
 else if (step == Step.Done)
 {
-    <div class="text-center py-5">
-        <div style="font-size: 3rem;">&#x1F3AF;</div>
-        <h3 class="mt-2">Match night saved!</h3>
-        <p class="text-muted">vs @savedOpponent — all @totalMatches matches recorded.</p>
-        <div class="d-flex gap-2 justify-content-center mt-3">
-            <a href="dart-performance-tracker" class="btn btn-outline-primary">Back to Dashboard</a>
-            <button class="btn btn-primary" @onclick="StartNew">Enter Another Night</button>
+    <div style="text-align: center; padding: 3rem 0;">
+        <div style="font-size: 3rem;">🎯</div>
+        <h3 style="margin-top: 0.5rem;">Match night saved!</h3>
+        <p style="color: var(--neutral-foreground-hint);">vs @savedOpponent — all @totalMatches matches recorded.</p>
+        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+            <FluentAnchor Href="/" Appearance="Appearance.Hypertext">Back to Dashboard</FluentAnchor>
+            <FluentButton Appearance="Appearance.Accent" @onclick="StartNew">Enter Another Night</FluentButton>
         </div>
     </div>
 }
@@ -235,16 +227,15 @@ else if (step == Step.Done)
             }).ToList()
         }).ToList();
 
-        // Resume at the first match that hasn't had any players selected yet
         currentMatchIndex = matchEdits.FindIndex(m => m.PlayerIds.Count == 0 && m.LegsWon == 0 && m.LegsLost == 0);
         if (currentMatchIndex < 0) currentMatchIndex = totalMatches;
 
         step = currentMatchIndex >= totalMatches ? Step.Review : Step.Matches;
     }
 
-    private void OnSeasonChanged(ChangeEventArgs e)
+    private void OnSeasonChanged(string value)
     {
-        if (int.TryParse(e.Value?.ToString(), out var id) && id > 0)
+        if (int.TryParse(value, out var id) && id > 0)
         {
             selectedSeason = seasons.FirstOrDefault(s => s.Id == id);
             orderedConfigs = selectedSeason?.MatchConfigurations.OrderBy(c => c.OrderIndex).ToList() ?? new();
@@ -305,7 +296,6 @@ else if (step == Step.Done)
             currentMatchIndex++;
             if (currentMatchIndex >= totalMatches)
             {
-                // Re-fetch to populate review with fresh data
                 createdGameNight = await Http.GetFromJsonAsync<GameNightDto>($"api/gamenights/{createdGameNight.Id}");
                 step = Step.Review;
             }
