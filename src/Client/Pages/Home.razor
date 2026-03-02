@@ -312,7 +312,7 @@
         await LoadDashboard();
     }
 
-    private async Task OnTeamChanged(string value)
+    private async Task OnTeamChanged(string? value)
     {
         if (int.TryParse(value, out var id) && id > 0)
         {
@@ -321,7 +321,7 @@
         }
     }
 
-    private async Task OnSeasonChanged(string value)
+    private async Task OnSeasonChanged(string? value)
     {
         if (int.TryParse(value, out var id) && id > 0)
         {

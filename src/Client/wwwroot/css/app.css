@@ -628,6 +628,7 @@ a:hover {
 .stat-stepper {
     display: flex;
     align-items: center;
+    gap: 0;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     overflow: hidden;

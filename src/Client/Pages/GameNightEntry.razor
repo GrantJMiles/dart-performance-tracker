@@ -233,7 +233,7 @@ else if (step == Step.Done)
         step = currentMatchIndex >= totalMatches ? Step.Review : Step.Matches;
     }
 
-    private void OnSeasonChanged(string value)
+    private void OnSeasonChanged(string? value)
     {
         if (int.TryParse(value, out var id) && id > 0)
         {
