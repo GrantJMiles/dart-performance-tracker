@@ -93,6 +93,13 @@ public class TeamPlayerSeasonStatsDto
     public int ManOfTheMatchCount { get; set; }
     public List<PlayerMatchTypeBreakdownDto> MatchTypeBreakdowns { get; set; } = new();
     public List<TopPairingDto> TopPairings { get; set; } = new();
+    public List<PlayerRecentResultDto> RecentResults { get; set; } = new();
+}
+
+public class PlayerRecentResultDto
+{
+    public string MatchTypeName { get; set; } = string.Empty;
+    public bool Won { get; set; }
 }
 
 public class PlayerMatchTypeBreakdownDto
