@@ -27,7 +27,7 @@ else
         <div class="row mb-3">
             <div class="col">
                 <strong>Last @dashboard.LastFiveForm.Count Form:</strong>
-                @foreach (var result in dashboard.LastFiveForm.AsEnumerable().Reverse())
+                @foreach (var result in dashboard.LastFiveForm)
                 {
                     <span class="badge me-1 @(result == "W" ? "bg-success" : result == "L" ? "bg-danger" : "bg-secondary")">@result</span>
                 }
