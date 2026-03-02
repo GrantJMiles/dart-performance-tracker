@@ -617,3 +617,52 @@ a:hover {
     color: var(--color-text-muted);
     margin-top: 0.25rem !important;
 }
+
+/* Form badge with hover tooltip */
+.form-badge-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-result-badge {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1.1rem !important;
+    cursor: default;
+}
+
+.form-badge-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    z-index: 100;
+    text-align: center;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+}
+
+.form-badge-wrapper:hover .form-badge-tooltip {
+    display: flex;
+}
+
+/* Win percentage pill badge (replaces broken circle for text) */
+.win-pct-badge {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: white;
+}
