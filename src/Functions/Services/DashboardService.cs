@@ -71,7 +71,7 @@ public class DashboardService : IDashboardService
 
         var lastFiveForm = orderedSummaries
             .Take(5)
-            .Reverse()
+            .OrderBy(s => s.Date)
             .Select(s => s.MatchesWon == s.MatchesLost ? "D" : s.Won ? "W" : "L")
             .ToList();
 
