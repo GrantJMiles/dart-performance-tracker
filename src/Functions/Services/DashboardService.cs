@@ -266,6 +266,10 @@ public class DashboardService : IDashboardService
 
     public async Task<List<TeamPlayerSeasonStatsDto>> GetTeamPlayerStatsAsync(int teamId, int seasonId)
     {
+        var matchTypeOrder = await _context.SeasonMatchConfigurations
+            .Where(c => c.SeasonId == seasonId)
+            .ToDictionaryAsync(c => c.MatchTypeId, c => c.OrderIndex);
+
         var matchPlayers = await _context.MatchPlayers
             .Include(mp => mp.Player)
             .Include(mp => mp.Match).ThenInclude(m => m.MatchType)
@@ -290,23 +294,30 @@ public class DashboardService : IDashboardService
                 var playerName = playerGroup.First().Player.Name;
 
                 var matchTypeBreakdowns = playerGroup
-                    .GroupBy(mp => mp.Match.MatchType.Name)
+                    .GroupBy(mp => mp.Match.MatchTypeId)
                     .Select(typeGroup =>
                     {
+                        var matchTypeId = typeGroup.Key;
                         var playerStats = typeGroup
                             .SelectMany(mp => mp.Match.PlayerStats.Where(ps => ps.PlayerId == playerId))
                             .ToList();
-                        return new PlayerMatchTypeBreakdownDto
+                        return new
                         {
-                            MatchTypeName = typeGroup.Key,
-                            MatchesPlayed = typeGroup.Count(),
-                            MatchesWon = typeGroup.Count(mp => mp.Match.Won),
-                            LegsWon = typeGroup.Sum(mp => mp.Match.LegsWon),
-                            LegsLost = typeGroup.Sum(mp => mp.Match.LegsLost),
-                            Tons = playerStats.Sum(ps => ps.Tons),
-                            Maximums = playerStats.Sum(ps => ps.Maximums)
+                            Order = matchTypeOrder.TryGetValue(matchTypeId, out var order) ? order : int.MaxValue,
+                            Breakdown = new PlayerMatchTypeBreakdownDto
+                            {
+                                MatchTypeName = typeGroup.First().Match.MatchType.Name,
+                                MatchesPlayed = typeGroup.Count(),
+                                MatchesWon = typeGroup.Count(mp => mp.Match.Won),
+                                LegsWon = typeGroup.Sum(mp => mp.Match.LegsWon),
+                                LegsLost = typeGroup.Sum(mp => mp.Match.LegsLost),
+                                Tons = playerStats.Sum(ps => ps.Tons),
+                                Maximums = playerStats.Sum(ps => ps.Maximums)
+                            }
                         };
                     })
+                    .OrderBy(x => x.Order)
+                    .Select(x => x.Breakdown)
                     .ToList();
 
                 var matchIds = playerGroup.Select(mp => mp.MatchId).ToHashSet();
@@ -328,9 +339,8 @@ public class DashboardService : IDashboardService
                             WinRatio = played > 0 ? Math.Round((double)won / played * 100, 1) : 0
                         };
                     })
-                    .OrderByDescending(p => p.MatchesWon)
-                    .ThenByDescending(p => p.MatchesPlayed)
-                    .Take(2)
+                    .OrderByDescending(p => p.WinRatio)
+                    .ThenByDescending(p => p.MatchesWon)
                     .ToList();
 
                 return new TeamPlayerSeasonStatsDto

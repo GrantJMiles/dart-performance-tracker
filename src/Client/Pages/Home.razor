@@ -136,10 +136,13 @@
                             {
                                 var result = night.Won ? "W" : night.MatchesWon == night.MatchesLost ? "D" : "L";
                                 var formClass = result == "W" ? "badge-won" : result == "D" ? "badge-drawn" : "badge-lost";
-                                <div class="text-center">
-                                    <span class="result-badge @formClass" style="font-size:1.1rem; padding: 0.5rem 1rem;">@result</span>
-                                    <div class="small text-muted mt-1">@night.Date.ToString("dd MMM")</div>
-                                    <div class="small text-muted">vs @night.Opponent</div>
+                                <div class="form-badge-wrapper">
+                                    <span class="result-badge form-result-badge @formClass">@result</span>
+                                    <div class="form-badge-tooltip">
+                                        <span class="fw-semibold">@result (@night.MatchesWon–@night.MatchesLost)</span>
+                                        <span>@night.Date.ToString("dd MMM")</span>
+                                        <span>vs @night.Opponent</span>
+                                    </div>
                                 </div>
                             }
                         </div>
@@ -252,7 +255,7 @@
             </div>
         }
 
-        <PlayerAccordionComponent Players="playerStats" />
+        <PlayerAccordionComponent Players="playerStats" MaximumScore="@(seasons?.FirstOrDefault(s => s.Id == selectedSeasonId)?.MaximumScore ?? 180)" />
     }
 </div>
 
@@ -287,7 +290,6 @@
     private List<GameNightSummaryDto> recentNights =>
         dashboard?.GameNightSummaries
             .OrderBy(g => g.Date)
-            .TakeLast(6)
             .ToList() ?? new();
 
     protected override async Task OnInitializedAsync()

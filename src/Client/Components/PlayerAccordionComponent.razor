@@ -12,7 +12,8 @@
             <span class="player-col-stat">Won</span>
             <span class="player-col-stat">Win%</span>
             <span class="player-col-stat">Tons</span>
-            <span class="player-col-stat">180s</span>
+            <span class="player-col-stat">@($"{MaximumScore}s")</span>
+            <span class="player-col-stat">+/-</span>
             <span class="player-col-motm">MOTM</span>
         </div>
 
@@ -22,6 +23,9 @@
             var totalWon = player.MatchTypeBreakdowns.Sum(b => b.MatchesWon);
             var totalTons = player.MatchTypeBreakdowns.Sum(b => b.Tons);
             var totalMaximums = player.MatchTypeBreakdowns.Sum(b => b.Maximums);
+            var totalLegsWon = player.MatchTypeBreakdowns.Sum(b => b.LegsWon);
+            var totalLegsLost = player.MatchTypeBreakdowns.Sum(b => b.LegsLost);
+            var legsDiff = totalLegsWon - totalLegsLost;
             var winPct = totalPlayed > 0 ? Math.Round((double)totalWon / totalPlayed * 100, 0) : 0;
             var isExpanded = expandedPlayerId == player.PlayerId;
 
@@ -36,6 +40,9 @@
                 </span>
                 <span class="player-col-stat">@totalTons</span>
                 <span class="player-col-stat">@totalMaximums</span>
+                <span class="player-col-stat">
+                    <span style="color: @(legsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(legsDiff >= 0 ? "+" : "")@legsDiff</span>
+                </span>
                 <span class="player-col-motm">@(player.ManOfTheMatchCount > 0 ? $"⭐ {player.ManOfTheMatchCount}" : "—")</span>
             </div>
 
@@ -54,8 +61,9 @@
                                     <th>Win%</th>
                                     <th>Legs W</th>
                                     <th>Legs L</th>
+                                    <th>+/-</th>
                                     <th>Tons</th>
-                                    <th>180s</th>
+                                    <th>@($"{MaximumScore}s")</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -64,15 +72,17 @@
                                     var bWinPct = breakdown.MatchesPlayed > 0
                                         ? Math.Round((double)breakdown.MatchesWon / breakdown.MatchesPlayed * 100, 0)
                                         : 0;
+                                    var bLegsDiff = breakdown.LegsWon - breakdown.LegsLost;
                                     <tr>
                                         <td>@breakdown.MatchTypeName</td>
                                         <td>@breakdown.MatchesPlayed</td>
                                         <td>@breakdown.MatchesWon</td>
                                         <td>
-                                            <span class="result-badge @(bWinPct >= 50 ? "badge-won" : "badge-lost")" style="font-size:0.72rem; padding:2px 6px;">@bWinPct%</span>
+                                            <span class="win-pct-badge @(bWinPct >= 50 ? "badge-won" : "badge-lost")">@bWinPct%</span>
                                         </td>
                                         <td>@breakdown.LegsWon</td>
                                         <td>@breakdown.LegsLost</td>
+                                        <td style="color: @(bLegsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(bLegsDiff >= 0 ? "+" : "")@bLegsDiff</td>
                                         <td>@breakdown.Tons</td>
                                         <td>@breakdown.Maximums</td>
                                     </tr>
@@ -83,14 +93,14 @@
 
                     @if (player.TopPairings.Any())
                     {
-                        <p class="small fw-semibold mb-1 text-muted">Top Pairings</p>
+                        <p class="small fw-semibold mb-1 text-muted">Pairings</p>
                         <div class="d-flex gap-2 flex-wrap">
                             @foreach (var pairing in player.TopPairings)
                             {
                                 <div class="p-2 rounded" style="background: rgba(255,255,255,0.05); min-width: 140px;">
                                     <div class="fw-semibold small">@pairing.PartnerName</div>
                                     <div class="text-muted" style="font-size:0.78rem;">@pairing.MatchesWon W / @pairing.MatchesPlayed played</div>
-                                    <span class="result-badge @(pairing.WinRatio >= 50 ? "badge-won" : "badge-lost")" style="font-size:0.72rem; padding:2px 6px;">@pairing.WinRatio%</span>
+                                    <span class="win-pct-badge @(pairing.WinRatio >= 50 ? "badge-won" : "badge-lost")">@pairing.WinRatio%</span>
                                 </div>
                             }
                         </div>
@@ -105,7 +115,7 @@
     .player-accordion-header-row,
     .player-accordion-row {
         display: grid;
-        grid-template-columns: 1fr 60px 50px 60px 50px 50px 60px;
+        grid-template-columns: 1fr 60px 50px 60px 50px 50px 55px 60px;
         align-items: center;
         padding: 8px 4px;
         gap: 4px;
@@ -150,6 +160,7 @@
 
 @code {
     [Parameter] public List<TeamPlayerSeasonStatsDto>? Players { get; set; }
+    [Parameter] public int MaximumScore { get; set; } = 180;
 
     private int? expandedPlayerId;
 
