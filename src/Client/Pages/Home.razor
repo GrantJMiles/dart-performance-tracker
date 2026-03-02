@@ -338,20 +338,26 @@
         playerStats = null;
         currentSlide = 0;
         StateHasChanged();
-        if (selectedTeamId > 0 && selectedSeasonId > 0)
+        try
         {
-            var dashboardTask = Http.GetFromJsonAsync<TeamDashboardDto>(
-                $"api/dashboard/team/{selectedTeamId}/season/{selectedSeasonId}");
-            var insightsTask = Http.GetFromJsonAsync<DashboardInsightsDto>(
-                $"api/dashboard/insights/{selectedTeamId}/season/{selectedSeasonId}");
-            var playerStatsTask = Http.GetFromJsonAsync<List<TeamPlayerSeasonStatsDto>>(
-                $"api/dashboard/team/{selectedTeamId}/season/{selectedSeasonId}/players");
-            await Task.WhenAll(dashboardTask, insightsTask, playerStatsTask);
-            dashboard = dashboardTask.Result;
-            insights = insightsTask.Result;
-            playerStats = playerStatsTask.Result;
+            if (selectedTeamId > 0 && selectedSeasonId > 0)
+            {
+                var dashboardTask = Http.GetFromJsonAsync<TeamDashboardDto>(
+                    $"api/dashboard/team/{selectedTeamId}/season/{selectedSeasonId}");
+                var insightsTask = Http.GetFromJsonAsync<DashboardInsightsDto>(
+                    $"api/dashboard/insights/{selectedTeamId}/season/{selectedSeasonId}");
+                var playerStatsTask = Http.GetFromJsonAsync<List<TeamPlayerSeasonStatsDto>>(
+                    $"api/dashboard/team/{selectedTeamId}/season/{selectedSeasonId}/players");
+                await Task.WhenAll(dashboardTask, insightsTask, playerStatsTask);
+                dashboard = await dashboardTask;
+                insights = await insightsTask;
+                playerStats = await playerStatsTask;
+            }
         }
-        loading = false;
+        finally
+        {
+            loading = false;
+        }
     }
 
     private async Task OpenGameNightDetail(int gameNightId)

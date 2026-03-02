@@ -269,7 +269,9 @@ public class DashboardService : IDashboardService
     {
         var matchTypeOrder = await _context.SeasonMatchConfigurations
             .Where(c => c.SeasonId == seasonId)
-            .ToDictionaryAsync(c => c.MatchTypeId, c => c.OrderIndex);
+            .GroupBy(c => c.MatchTypeId)
+            .Select(g => new { MatchTypeId = g.Key, OrderIndex = g.Min(c => c.OrderIndex) })
+            .ToDictionaryAsync(x => x.MatchTypeId, x => x.OrderIndex);
 
         var matchPlayers = await _context.MatchPlayers
             .Include(mp => mp.Player)
