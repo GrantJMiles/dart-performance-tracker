@@ -1,7 +1,7 @@
 @using DartPerformanceTracker.Shared.DTOs
 
-<span class="badge bg-primary me-1">@MatchTypeName</span>
-<span class="text-muted small">(@PlayersPerSide v @PlayersPerSide)</span>
+<FluentBadge Appearance="Appearance.Accent" Style="margin-right: 4px;">@MatchTypeName</FluentBadge>
+<span style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">(@PlayersPerSide v @PlayersPerSide)</span>
 
 @code {
     [Parameter, EditorRequired] public string MatchTypeName { get; set; } = string.Empty;

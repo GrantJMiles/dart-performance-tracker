@@ -10,73 +10,77 @@
         <div class="dashboard-selectors">
             @if (teams != null && teams.Any())
             {
-                <select class="form-select form-select-sm" value="@selectedTeamId" @onchange="OnTeamChanged">
+                <FluentSelect TOption="string"
+                              Value="@selectedTeamId.ToString()"
+                              ValueChanged="@OnTeamChanged"
+                              style="min-width: 150px;">
                     @foreach (var t in teams)
                     {
-                        <option value="@t.Id">@t.Name</option>
+                        <FluentOption Value="@t.Id.ToString()">@t.Name</FluentOption>
                     }
-                </select>
+                </FluentSelect>
             }
             @if (seasons != null && seasons.Any())
             {
-                <select class="form-select form-select-sm" value="@selectedSeasonId" @onchange="OnSeasonChanged">
+                <FluentSelect TOption="string"
+                              Value="@selectedSeasonId.ToString()"
+                              ValueChanged="@OnSeasonChanged"
+                              style="min-width: 150px;">
                     @foreach (var s in seasons)
                     {
-                        <option value="@s.Id">@s.Name</option>
+                        <FluentOption Value="@s.Id.ToString()">@s.Name</FluentOption>
                     }
-                </select>
+                </FluentSelect>
             }
         </div>
     </div>
 
     @if (incompleteNights.Any())
     {
-        <div class="alert alert-warning mb-3" style="border-radius: 8px;">
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <strong>&#x26A0;&#xFE0F; Incomplete match nights</strong>
-            </div>
+        <FluentMessageBar Intent="MessageIntent.Warning" Style="border-radius: 8px; margin-bottom: 1rem;">
+            <strong>⚠️ Incomplete match nights</strong>
             @foreach (var night in incompleteNights)
             {
-                <div class="d-flex align-items-center gap-2 mt-1">
-                    <span class="small">vs @night.Opponent &mdash; @night.Date.ToString("dd MMM yyyy")</span>
-                    <a href="matchday?id=@night.Id" class="btn btn-sm btn-warning py-0">Continue ▶</a>
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+                    <span style="font-size: 0.875rem;">vs @night.Opponent &mdash; @night.Date.ToString("dd MMM yyyy")</span>
+                    <FluentAnchor Href="@($"matchday?id={night.Id}")" Appearance="Appearance.Hypertext">Continue ▶</FluentAnchor>
                 </div>
             }
-        </div>
+        </FluentMessageBar>
     }
 
     @if (loading)
     {
         <div class="loading-state">
-            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <FluentProgressRing />
             <span>Loading...</span>
         </div>
     }
     else if (teams == null || !teams.Any())
     {
         <div class="empty-state">
-            <div class="empty-icon">&#x1F3AF;</div>
+            <div class="empty-icon">🎯</div>
             <h3>Welcome to Dart Tracker</h3>
-            <p class="text-muted">Get started by adding a season, your team, and players in settings.</p>
-            <a href="config" class="btn-accent"><i class="bi bi-gear-fill me-1"></i>Open Settings</a>
+            <p style="color: var(--neutral-foreground-hint);">Get started by adding a season, your team, and players in settings.</p>
+            <FluentAnchor Href="config" Appearance="Appearance.Hypertext">⚙️ Open Settings</FluentAnchor>
         </div>
     }
     else if (seasons == null || !seasons.Any())
     {
         <div class="empty-state">
-            <div class="empty-icon">&#x1F4C5;</div>
+            <div class="empty-icon">📅</div>
             <h3>No seasons yet</h3>
-            <p class="text-muted">Add a season in settings to start tracking results.</p>
-            <a href="config" class="btn-accent"><i class="bi bi-gear-fill me-1"></i>Open Settings</a>
+            <p style="color: var(--neutral-foreground-hint);">Add a season in settings to start tracking results.</p>
+            <FluentAnchor Href="config" Appearance="Appearance.Hypertext">⚙️ Open Settings</FluentAnchor>
         </div>
     }
     else if (dashboard == null || dashboard.TotalGameNights == 0)
     {
         <div class="empty-state">
-            <div class="empty-icon">&#x1F3AF;</div>
+            <div class="empty-icon">🎯</div>
             <h3>No game nights yet</h3>
-            <p class="text-muted">Record your first match night to start tracking results.</p>
-            <a href="matchday" class="btn-accent"><i class="bi bi-file-earmark-text-fill me-1"></i>Enter Match Night</a>
+            <p style="color: var(--neutral-foreground-hint);">Record your first match night to start tracking results.</p>
+            <FluentAnchor Href="matchday" Appearance="Appearance.Hypertext">📋 Enter Match Night</FluentAnchor>
         </div>
     }
     else
@@ -108,10 +112,10 @@
             </div>
         }
 
-        @* Stats Carousel - pure Blazor, no Bootstrap JS dependency *@
+        @* Stats Carousel *@
         <div class="stats-carousel-card mb-3">
             <div class="stats-carousel-header">
-                <button class="carousel-nav-btn" @onclick="PrevSlide">&#8249;</button>
+                <FluentButton Appearance="Appearance.Stealth" @onclick="PrevSlide" title="Previous">&#8249;</FluentButton>
                 <div class="stats-carousel-title">
                     @slideTitle
                     <div class="carousel-dots mt-1">
@@ -122,16 +126,15 @@
                         }
                     </div>
                 </div>
-                <button class="carousel-nav-btn" @onclick="NextSlide">&#8250;</button>
+                <FluentButton Appearance="Appearance.Stealth" @onclick="NextSlide" title="Next">&#8250;</FluentButton>
             </div>
             <div class="stats-carousel-body">
-                    @if (currentSlide == 0)
+                @if (currentSlide == 0)
                 {
-                    @* Team Form *@
                     var last5 = dashboard.GameNightSummaries.OrderByDescending(g => g.Date).Take(5).OrderBy(g => g.Date).ToList();
                     @if (last5.Any())
                     {
-                        <div class="d-flex gap-3 flex-wrap justify-content-center">
+                        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;">
                             @foreach (var night in last5)
                             {
                                 var result = night.Won ? "W" : night.MatchesWon == night.MatchesLost ? "D" : "L";
@@ -139,7 +142,7 @@
                                 <div class="form-badge-wrapper">
                                     <span class="result-badge form-result-badge @formClass">@result</span>
                                     <div class="form-badge-tooltip">
-                                        <span class="fw-semibold">@result (@night.MatchesWon–@night.MatchesLost)</span>
+                                        <span style="font-weight: 600;">@result (@night.MatchesWon–@night.MatchesLost)</span>
                                         <span>@night.Date.ToString("dd MMM")</span>
                                         <span>vs @night.Opponent</span>
                                     </div>
@@ -150,22 +153,21 @@
                     else
                     {
                         <div class="carousel-empty-state">
-                            <span class="carousel-empty-icon">&#x1F4C5;</span>
+                            <span class="carousel-empty-icon">📅</span>
                             <p>No results recorded yet.</p>
                         </div>
                     }
                 }
                 else if (currentSlide == 1)
                 {
-                    @* Singles MVP *@
                     @if (insightsLoading)
                     {
-                        <div class="carousel-empty-state"><div class="spinner-border spinner-border-sm"></div></div>
+                        <div class="carousel-empty-state"><FluentProgressRing /></div>
                     }
                     else if (insights?.SinglesMvp != null)
                     {
                         <div class="mvp-display">
-                            <div class="mvp-trophy">&#x1F3C6;</div>
+                            <div class="mvp-trophy">🏆</div>
                             <div class="mvp-player-name">@insights.SinglesMvp.PlayerName</div>
                             <div class="mvp-stat-primary">@insights.SinglesMvp.WinPercentage% win rate</div>
                             <div class="mvp-stat-secondary">@insights.SinglesMvp.MatchesWon wins from @insights.SinglesMvp.MatchesPlayed singles games</div>
@@ -174,7 +176,7 @@
                     else
                     {
                         <div class="carousel-empty-state">
-                            <span class="carousel-empty-icon">&#x1F3AF;</span>
+                            <span class="carousel-empty-icon">🎯</span>
                             <p>No Singles MVP yet.</p>
                             <p class="carousel-empty-hint">Players need at least 5 singles games to qualify.</p>
                         </div>
@@ -182,15 +184,14 @@
                 }
                 else if (currentSlide == 2)
                 {
-                    @* Season MVP *@
                     @if (insightsLoading)
                     {
-                        <div class="carousel-empty-state"><div class="spinner-border spinner-border-sm"></div></div>
+                        <div class="carousel-empty-state"><FluentProgressRing /></div>
                     }
                     else if (insights?.SeasonMvp != null)
                     {
                         <div class="mvp-display">
-                            <div class="mvp-trophy">&#x1F31F;</div>
+                            <div class="mvp-trophy">🌟</div>
                             <div class="mvp-player-name">@insights.SeasonMvp.PlayerName</div>
                             <div class="mvp-stat-primary">@insights.SeasonMvp.MatchesWon wins this season</div>
                             <div class="mvp-stat-secondary">@insights.SeasonMvp.WinPercentage% win rate across @insights.SeasonMvp.MatchesPlayed singles &amp; pairs games</div>
@@ -199,7 +200,7 @@
                     else
                     {
                         <div class="carousel-empty-state">
-                            <span class="carousel-empty-icon">&#x1F31F;</span>
+                            <span class="carousel-empty-icon">🌟</span>
                             <p>No Season MVP data yet.</p>
                             <p class="carousel-empty-hint">Record singles and pairs results to see the season leader.</p>
                         </div>
@@ -207,15 +208,14 @@
                 }
                 else
                 {
-                    @* Pairs MVP *@
                     @if (insightsLoading)
                     {
-                        <div class="carousel-empty-state"><div class="spinner-border spinner-border-sm"></div></div>
+                        <div class="carousel-empty-state"><FluentProgressRing /></div>
                     }
                     else if (insights?.PairsMvp != null)
                     {
                         <div class="mvp-display">
-                            <div class="mvp-trophy">&#x1F91D;</div>
+                            <div class="mvp-trophy">🤝</div>
                             <div class="mvp-player-name">@insights.PairsMvp.Player1Name &amp; @insights.PairsMvp.Player2Name</div>
                             <div class="mvp-stat-primary">@insights.PairsMvp.MatchesWon wins together</div>
                             <div class="mvp-stat-secondary">@insights.PairsMvp.MatchesPlayed pairs games played</div>
@@ -224,7 +224,7 @@
                     else
                     {
                         <div class="carousel-empty-state">
-                            <span class="carousel-empty-icon">&#x1F91D;</span>
+                            <span class="carousel-empty-icon">🤝</span>
                             <p>No Pairs MVP data yet.</p>
                             <p class="carousel-empty-hint">Record pairs match results to find your best duo.</p>
                         </div>
@@ -312,18 +312,18 @@
         await LoadDashboard();
     }
 
-    private async Task OnTeamChanged(ChangeEventArgs e)
+    private async Task OnTeamChanged(string? value)
     {
-        if (int.TryParse(e.Value?.ToString(), out var id) && id > 0)
+        if (int.TryParse(value, out var id) && id > 0)
         {
             selectedTeamId = id;
             await LoadDashboard();
         }
     }
 
-    private async Task OnSeasonChanged(ChangeEventArgs e)
+    private async Task OnSeasonChanged(string? value)
     {
-        if (int.TryParse(e.Value?.ToString(), out var id) && id > 0)
+        if (int.TryParse(value, out var id) && id > 0)
         {
             selectedSeasonId = id;
             await LoadDashboard();

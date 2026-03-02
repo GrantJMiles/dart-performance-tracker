@@ -6,32 +6,30 @@
 
 @if (dashboard == null)
 {
-    <p>Loading...</p>
+    <FluentProgressRing />
 }
 else
 {
     <h4>@dashboard.SeasonName</h4>
-    <div class="row mb-3">
-        <div class="col"><strong>Game Nights:</strong> @dashboard.TotalGameNights</div>
-        <div class="col"><strong>Won:</strong> @dashboard.GameNightsWon</div>
-        <div class="col"><strong>Lost:</strong> @dashboard.GameNightsLost</div>
-        <div class="col"><strong>Drawn:</strong> @dashboard.GameNightsDrawn</div>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem;">
+        <FluentCard><div><strong>Game Nights:</strong> @dashboard.TotalGameNights</div></FluentCard>
+        <FluentCard><div><strong>Won:</strong> @dashboard.GameNightsWon</div></FluentCard>
+        <FluentCard><div><strong>Lost:</strong> @dashboard.GameNightsLost</div></FluentCard>
+        <FluentCard><div><strong>Drawn:</strong> @dashboard.GameNightsDrawn</div></FluentCard>
     </div>
-    <div class="row mb-3">
-        <div class="col"><strong>Matches Played:</strong> @dashboard.TotalMatchesPlayed</div>
-        <div class="col"><strong>Matches Won:</strong> @dashboard.TotalMatchesWon</div>
-        <div class="col"><strong>Matches Lost:</strong> @dashboard.TotalMatchesLost</div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+        <FluentCard><div><strong>Matches Played:</strong> @dashboard.TotalMatchesPlayed</div></FluentCard>
+        <FluentCard><div><strong>Matches Won:</strong> @dashboard.TotalMatchesWon</div></FluentCard>
+        <FluentCard><div><strong>Matches Lost:</strong> @dashboard.TotalMatchesLost</div></FluentCard>
     </div>
     @if (dashboard.LastFiveForm.Count > 0)
     {
-        <div class="row mb-3">
-            <div class="col">
-                <strong>Last @dashboard.LastFiveForm.Count Form:</strong>
-                @foreach (var result in dashboard.LastFiveForm)
-                {
-                    <span class="badge me-1 @(result == "W" ? "bg-success" : result == "L" ? "bg-danger" : "bg-secondary")">@result</span>
-                }
-            </div>
+        <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <strong>Last @dashboard.LastFiveForm.Count Form:</strong>
+            @foreach (var result in dashboard.LastFiveForm)
+            {
+                <FluentBadge Appearance="@(result == "W" ? Appearance.Accent : Appearance.Neutral)">@result</FluentBadge>
+            }
         </div>
     }
     <StatsSummaryComponent Label="Game Night Results" Items="gameNightItems" />

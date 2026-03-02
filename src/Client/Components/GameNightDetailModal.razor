@@ -2,91 +2,84 @@
 
 @if (Visible && GameNight != null)
 {
-    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" @onclick="HandleBackdropClick">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable" @onclick:stopPropagation="true">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        @GameNight.Date.ToString("dd MMM yyyy") vs @GameNight.Opponent
-                        @(GameNight.IsHome ? "🏠" : "✈️")
-                    </h5>
-                    <button type="button" class="btn-close" @onclick="OnClose"></button>
-                </div>
-                <div class="modal-body">
-                    @if (!GameNight.Matches.Any())
-                    {
-                        <p class="text-muted">No match data recorded.</p>
-                    }
-                    else
-                    {
-                        var totalWon = GameNight.Matches.Count(m => m.Won);
-                        var totalLost = GameNight.Matches.Count(m => !m.Won);
-                        var nightResult = totalWon > totalLost ? "W" : totalWon == totalLost ? "D" : "L";
-                        var nightBadgeClass = nightResult == "W" ? "bg-success" : nightResult == "D" ? "bg-secondary" : "bg-danger";
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Type</th>
-                                    <th>Players</th>
-                                    <th class="text-center">Score</th>
-                                    <th class="text-center">Result</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var match in GameNight.Matches.OrderBy(m => m.OrderIndex))
-                                {
-                                    var isWon = match.Won;
-                                    var isDraw = match.LegsWon == match.LegsLost;
-                                    var playerNames = string.Join(" & ", match.PlayerStats.Select(ps => ps.PlayerName).Where(n => !string.IsNullOrEmpty(n)));
-                                    <tr>
-                                        <td>@(match.OrderIndex + 1)</td>
-                                        <td>@match.MatchTypeName</td>
-                                        <td>@playerNames</td>
-                                        <td class="text-center">@match.LegsWon&ndash;@match.LegsLost</td>
-                                        <td class="text-center">
-                                            <span class="badge @(isWon ? "bg-success" : isDraw ? "bg-secondary" : "bg-danger")">
-                                                @(isWon ? "W" : isDraw ? "D" : "L")
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    @if (match.PlayerStats.Any(ps => ps.Tons > 0 || ps.Maximums > 0))
-                                    {
-                                        <tr class="table-light">
-                                            <td></td>
-                                            <td colspan="4" class="small text-muted ps-3">
-                                                @foreach (var ps in match.PlayerStats.Where(ps => ps.Tons > 0 || ps.Maximums > 0))
-                                                {
-                                                    <span class="me-3">
-                                                        @ps.PlayerName:
-                                                        @if (ps.Tons > 0) { <span>@ps.Tons ton@(ps.Tons != 1 ? "s" : "")</span> }
-                                                        @if (ps.Maximums > 0) { <span class="ms-1">@ps.Maximums max@(ps.Maximums != 1 ? "s" : "")</span> }
-                                                    </span>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                            </tbody>
-                        </table>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <strong>Final: @totalWon&ndash;@totalLost</strong>
-                            <span class="badge @nightBadgeClass fs-6">@nightResult</span>
-                        </div>
-                        @if (GameNight.ManOfTheMatchPlayerIds.Any() && MotmNames.Any())
+    <FluentDialog Hidden="@(!Visible)" Modal="true" TrapFocus="true"
+                  OnDismiss="@(() => OnClose.InvokeAsync())"
+                  Style="width: min(90vw, 700px);">
+        <FluentDialogHeader>
+            <strong>@GameNight.Date.ToString("dd MMM yyyy") vs @GameNight.Opponent @(GameNight.IsHome ? "🏠" : "✈️")</strong>
+        </FluentDialogHeader>
+        <FluentDialogBody>
+            @if (!GameNight.Matches.Any())
+            {
+                <p style="color: var(--neutral-foreground-hint);">No match data recorded.</p>
+            }
+            else
+            {
+                var totalWon = GameNight.Matches.Count(m => m.Won);
+                var totalLost = GameNight.Matches.Count(m => !m.Won);
+                var nightResult = totalWon > totalLost ? "W" : totalWon == totalLost ? "D" : "L";
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--neutral-stroke-rest);">
+                            <th style="padding: 6px 8px; text-align: left;">#</th>
+                            <th style="padding: 6px 8px; text-align: left;">Type</th>
+                            <th style="padding: 6px 8px; text-align: left;">Players</th>
+                            <th style="padding: 6px 8px; text-align: center;">Score</th>
+                            <th style="padding: 6px 8px; text-align: center;">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var match in GameNight.Matches.OrderBy(m => m.OrderIndex))
                         {
-                            <div class="mt-2 text-muted small">
-                                &#11088; Man of the Match: @string.Join(", ", MotmNames)
-                            </div>
+                            var isWon = match.Won;
+                            var isDraw = match.LegsWon == match.LegsLost;
+                            var playerNames = string.Join(" & ", match.PlayerStats.Select(ps => ps.PlayerName).Where(n => !string.IsNullOrEmpty(n)));
+                            <tr style="border-bottom: 1px solid var(--neutral-stroke-rest);">
+                                <td style="padding: 6px 8px;">@(match.OrderIndex + 1)</td>
+                                <td style="padding: 6px 8px;">@match.MatchTypeName</td>
+                                <td style="padding: 6px 8px;">@playerNames</td>
+                                <td style="padding: 6px 8px; text-align: center;">@match.LegsWon&ndash;@match.LegsLost</td>
+                                <td style="padding: 6px 8px; text-align: center;">
+                                    <span class="result-badge @(isWon ? "badge-won" : isDraw ? "badge-drawn" : "badge-lost")">
+                                        @(isWon ? "W" : isDraw ? "D" : "L")
+                                    </span>
+                                </td>
+                            </tr>
+                            @if (match.PlayerStats.Any(ps => ps.Tons > 0 || ps.Maximums > 0))
+                            {
+                                <tr style="background: var(--neutral-fill-stealth-rest);">
+                                    <td></td>
+                                    <td colspan="4" style="padding: 4px 8px; font-size: 0.8rem; color: var(--neutral-foreground-hint);">
+                                        @foreach (var ps in match.PlayerStats.Where(ps => ps.Tons > 0 || ps.Maximums > 0))
+                                        {
+                                            <span style="margin-right: 0.75rem;">
+                                                @ps.PlayerName:
+                                                @if (ps.Tons > 0) { <span>@ps.Tons ton@(ps.Tons != 1 ? "s" : "")</span> }
+                                                @if (ps.Maximums > 0) { <span style="margin-left: 4px;">@ps.Maximums max@(ps.Maximums != 1 ? "s" : "")</span> }
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
                         }
-                    }
+                    </tbody>
+                </table>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;">
+                    <strong>Final: @totalWon&ndash;@totalLost</strong>
+                    <span class="result-badge @(nightResult == "W" ? "badge-won" : nightResult == "D" ? "badge-drawn" : "badge-lost")" style="font-size: 1rem; padding: 4px 12px;">@nightResult</span>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="OnClose">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                @if (GameNight.ManOfTheMatchPlayerIds.Any() && MotmNames.Any())
+                {
+                    <div style="margin-top: 0.5rem; color: var(--neutral-foreground-hint); font-size: 0.875rem;">
+                        ⭐ Man of the Match: @string.Join(", ", MotmNames)
+                    </div>
+                }
+            }
+        </FluentDialogBody>
+        <FluentDialogFooter>
+            <FluentButton Appearance="Appearance.Outline" @onclick="@(() => OnClose.InvokeAsync())">Close</FluentButton>
+        </FluentDialogFooter>
+    </FluentDialog>
 }
 
 @code {
@@ -94,6 +87,4 @@
     [Parameter] public bool Visible { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public List<string> MotmNames { get; set; } = new();
-
-    private void HandleBackdropClick() => OnClose.InvokeAsync();
 }

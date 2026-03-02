@@ -42,7 +42,7 @@
             <div class="player-accordion-row @(isExpanded ? "expanded" : "")"
                  @onclick="() => TogglePlayer(player.PlayerId)"
                  style="cursor: pointer;">
-                <span class="player-col-name fw-semibold">@player.PlayerName</span>
+                <span class="player-col-name" style="font-weight: 600;">@player.PlayerName</span>
                 <span class="player-col-form">
                     @foreach (var r in recentForm)
                     {
@@ -74,19 +74,19 @@
                 <div class="player-accordion-detail">
                     @if (breakdowns.Any())
                     {
-                        <p class="small fw-semibold mb-1 text-muted">Match Type Breakdown</p>
-                        <table class="table table-sm mb-3" style="font-size: 0.83rem;">
+                        <p style="font-size: 0.83rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--neutral-foreground-hint);">Match Type Breakdown</p>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-bottom: 0.75rem;">
                             <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Played</th>
-                                    <th>Won</th>
-                                    <th>Win%</th>
-                                    <th>Legs W</th>
-                                    <th>Legs L</th>
-                                    <th>+/-</th>
-                                    <th>Tons</th>
-                                    <th>@($"{MaximumScore}s")</th>
+                                <tr style="border-bottom: 1px solid var(--neutral-stroke-rest);">
+                                    <th style="padding: 4px 8px; text-align: left;">Type</th>
+                                    <th style="padding: 4px 8px;">Played</th>
+                                    <th style="padding: 4px 8px;">Won</th>
+                                    <th style="padding: 4px 8px;">Win%</th>
+                                    <th style="padding: 4px 8px;">Legs W</th>
+                                    <th style="padding: 4px 8px;">Legs L</th>
+                                    <th style="padding: 4px 8px;">+/-</th>
+                                    <th style="padding: 4px 8px;">Tons</th>
+                                    <th style="padding: 4px 8px;">@($"{MaximumScore}s")</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -96,18 +96,18 @@
                                         ? Math.Round((double)breakdown.MatchesWon / breakdown.MatchesPlayed * 100, 0)
                                         : 0;
                                     var bLegsDiff = breakdown.LegsWon - breakdown.LegsLost;
-                                    <tr>
-                                        <td>@breakdown.MatchTypeName</td>
-                                        <td>@breakdown.MatchesPlayed</td>
-                                        <td>@breakdown.MatchesWon</td>
-                                        <td>
+                                    <tr style="border-bottom: 1px solid var(--neutral-stroke-rest);">
+                                        <td style="padding: 4px 8px;">@breakdown.MatchTypeName</td>
+                                        <td style="padding: 4px 8px; text-align: center;">@breakdown.MatchesPlayed</td>
+                                        <td style="padding: 4px 8px; text-align: center;">@breakdown.MatchesWon</td>
+                                        <td style="padding: 4px 8px; text-align: center;">
                                             <span class="win-pct-badge @(bWinPct >= 50 ? "badge-won" : "badge-lost")">@bWinPct%</span>
                                         </td>
-                                        <td>@breakdown.LegsWon</td>
-                                        <td>@breakdown.LegsLost</td>
-                                        <td style="color: @(bLegsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(bLegsDiff >= 0 ? "+" : "")@bLegsDiff</td>
-                                        <td>@breakdown.Tons</td>
-                                        <td>@breakdown.Maximums</td>
+                                        <td style="padding: 4px 8px; text-align: center;">@breakdown.LegsWon</td>
+                                        <td style="padding: 4px 8px; text-align: center;">@breakdown.LegsLost</td>
+                                        <td style="padding: 4px 8px; text-align: center; color: @(bLegsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(bLegsDiff >= 0 ? "+" : "")@bLegsDiff</td>
+                                        <td style="padding: 4px 8px; text-align: center;">@breakdown.Tons</td>
+                                        <td style="padding: 4px 8px; text-align: center;">@breakdown.Maximums</td>
                                     </tr>
                                 }
                             </tbody>
@@ -116,13 +116,13 @@
 
                     @if (player.TopPairings.Any())
                     {
-                        <p class="small fw-semibold mb-1 text-muted">Pairings</p>
-                        <div class="d-flex gap-2 flex-wrap">
+                        <p style="font-size: 0.83rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--neutral-foreground-hint);">Pairings</p>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             @foreach (var pairing in player.TopPairings)
                             {
-                                <div class="p-2 rounded" style="background: rgba(255,255,255,0.05); min-width: 140px;">
-                                    <div class="fw-semibold small">@pairing.PartnerName</div>
-                                    <div class="text-muted" style="font-size:0.78rem;">@pairing.MatchesWon W / @pairing.MatchesPlayed played</div>
+                                <div style="padding: 0.5rem; border-radius: 6px; background: rgba(255,255,255,0.05); min-width: 140px;">
+                                    <div style="font-weight: 600; font-size: 0.875rem;">@pairing.PartnerName</div>
+                                    <div style="color: var(--neutral-foreground-hint); font-size: 0.78rem;">@pairing.MatchesWon W / @pairing.MatchesPlayed played</div>
                                     <span class="win-pct-badge @(pairing.WinRatio >= 50 ? "badge-won" : "badge-lost")">@pairing.WinRatio%</span>
                                 </div>
                             }
@@ -144,9 +144,9 @@
     .player-tab-btn {
         padding: 4px 14px;
         border-radius: 20px;
-        border: 1px solid rgba(255,255,255,0.2);
+        border: 1px solid var(--neutral-stroke-rest, rgba(255,255,255,0.2));
         background: transparent;
-        color: var(--text-muted, #aaa);
+        color: var(--neutral-foreground-hint, #aaa);
         font-size: 0.78rem;
         cursor: pointer;
         transition: background 0.15s, color 0.15s;
@@ -171,7 +171,7 @@
     .player-accordion-header-row {
         font-size: 0.78rem;
         font-weight: 600;
-        color: var(--text-muted, #aaa);
+        color: var(--neutral-foreground-hint, #aaa);
         border-bottom: 1px solid rgba(255,255,255,0.15);
         padding-bottom: 6px;
         margin-bottom: 2px;
@@ -213,12 +213,6 @@
     .player-accordion-detail {
         padding: 10px 4px 14px 8px;
         border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .player-accordion-detail .table th,
-    .player-accordion-detail .table td {
-        padding: 4px 8px;
-        white-space: nowrap;
     }
 </style>
 
