@@ -128,7 +128,7 @@
                     @if (currentSlide == 0)
                 {
                     @* Team Form *@
-                    var last5 = dashboard.GameNightSummaries.OrderByDescending(g => g.Date).Take(5).ToList();
+                    var last5 = dashboard.GameNightSummaries.OrderByDescending(g => g.Date).Take(5).OrderBy(g => g.Date).ToList();
                     @if (last5.Any())
                     {
                         <div class="d-flex gap-3 flex-wrap justify-content-center">
