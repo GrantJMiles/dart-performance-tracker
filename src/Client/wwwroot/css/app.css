@@ -657,7 +657,6 @@ a:hover {
     display: flex;
 }
 
-/* Win percentage pill badge (replaces broken circle for text) */
 .win-pct-badge {
     display: inline-block;
     border-radius: 4px;
@@ -665,4 +664,230 @@ a:hover {
     font-size: 0.72rem;
     font-weight: 700;
     color: white;
+}
+
+/* ============================================================
+   Match Entry — Score Picker
+   ============================================================ */
+.score-picker {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+.score-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 0.5rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s, border-color 0.15s, background 0.15s, color 0.15s;
+    gap: 0.2rem;
+    min-height: 72px;
+}
+
+.score-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
+}
+
+.score-btn.win.selected {
+    background: var(--color-won);
+    border-color: var(--color-won);
+    color: white;
+}
+
+.score-btn.win-close.selected {
+    background: #34d399;
+    border-color: #34d399;
+    color: white;
+}
+
+.score-btn.loss-close.selected {
+    background: #f87171;
+    border-color: #f87171;
+    color: white;
+}
+
+.score-btn.loss.selected {
+    background: var(--color-lost);
+    border-color: var(--color-lost);
+    color: white;
+}
+
+.score-btn-label {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.score-btn-sublabel {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.85;
+}
+
+/* ============================================================
+   Match Entry — Stat Steppers
+   ============================================================ */
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+.stat-player-name {
+    font-weight: 600;
+    flex: 1;
+    min-width: 100px;
+}
+
+.stat-stepper-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.stat-stepper-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+}
+
+.stat-stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.stepper-btn {
+    background: var(--color-bg);
+    border: none;
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--color-text);
+    transition: background 0.1s;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stepper-btn:hover {
+    background: var(--color-border);
+}
+
+.stepper-value {
+    min-width: 36px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+/* ============================================================
+   Player Selector — Avatar Grid
+   ============================================================ */
+.player-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.player-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.75rem 0.625rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s, border-color 0.15s, background 0.15s;
+    min-width: 72px;
+    position: relative;
+}
+
+.player-card:hover:not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
+}
+
+.player-card.selected {
+    border-color: var(--color-accent);
+    background: var(--color-accent-muted);
+}
+
+.player-card.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.player-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--color-accent-muted);
+    color: var(--color-accent);
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.player-card.selected .player-avatar {
+    background: var(--color-accent);
+    color: white;
+}
+
+.player-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+    color: var(--color-text);
+    max-width: 68px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-check {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    font-size: 0.7rem;
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+@media (max-width: 400px) {
+    .score-picker {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

@@ -5,34 +5,31 @@
         <MatchTypeRenderer MatchTypeName="@Config.MatchTypeName" PlayersPerSide="@Config.PlayersPerSide" /> &mdash; Match @MatchNumber
     </div>
     <div class="card-body">
-        <div class="row g-2">
-            <div class="col-6 col-sm-4">
-                <label class="form-label">Legs Won</label>
-                <input type="number" class="form-control" min="0" @bind="Match.LegsWon" />
-            </div>
-            <div class="col-6 col-sm-4">
-                <label class="form-label">Legs Lost</label>
-                <input type="number" class="form-control" min="0" @bind="Match.LegsLost" />
-            </div>
-            @if (Match.LegsWon != 0 || Match.LegsLost != 0)
+        <label class="form-label">Result</label>
+        <div class="score-picker">
+            @foreach (var option in ScoreOptions)
             {
-                <div class="col-12 col-sm-4 d-flex align-items-end pb-1">
-                    <span class="badge @(Match.LegsWon > Match.LegsLost ? "bg-success" : Match.LegsWon < Match.LegsLost ? "bg-danger" : "bg-secondary") fs-6">
-                        @(Match.LegsWon > Match.LegsLost ? "Win" : Match.LegsWon < Match.LegsLost ? "Loss" : "Draw")
-                    </span>
-                </div>
+                var isSelected = Match.LegsWon == option.Won && Match.LegsLost == option.Lost;
+                <button type="button"
+                        class="score-btn @option.Theme @(isSelected ? "selected" : "")"
+                        aria-pressed="@isSelected"
+                        @onclick="() => SetScore(option.Won, option.Lost)">
+                    <span class="score-btn-label">@option.Won&ndash;@option.Lost</span>
+                    <span class="score-btn-sublabel">@option.Label</span>
+                </button>
             }
         </div>
+
         <div class="mt-3">
-            <label class="form-label">Players (@Config.PlayersPerSide per side)</label>
             <PlayerSelectorComponent
                 Players="Players"
                 SelectedPlayerIds="Match.PlayerIds"
                 SelectedPlayerIdsChanged="OnPlayerIdsChanged"
                 Prefix="@($"match_{Config.MatchTypeId}_{MatchNumber}")"
-                Label="Select Players"
+                Label="@($"Players ({Config.PlayersPerSide} per side)")"
                 MaxSelections="Config.PlayersPerSide" />
         </div>
+
         @if (Match.PlayerStats.Any())
         {
             <div class="mt-3">
@@ -40,15 +37,23 @@
                 @foreach (var stat in Match.PlayerStats)
                 {
                     var playerName = Players.FirstOrDefault(p => p.Id == stat.PlayerId)?.Name ?? stat.PlayerId.ToString();
-                    <div class="row g-2 mt-1 align-items-center">
-                        <div class="col-12 col-sm-4"><strong>@playerName</strong></div>
-                        <div class="col-6 col-sm-4">
-                            <label class="form-label mb-1 small">Tons</label>
-                            <input type="number" class="form-control form-control-sm" min="0" @bind="stat.Tons" />
+                    <div class="stat-row">
+                        <span class="stat-player-name">@playerName</span>
+                        <div class="stat-stepper-group">
+                            <span class="stat-stepper-label">Tons</span>
+                            <div class="stat-stepper">
+                                <button type="button" class="stepper-btn" aria-label="Decrease tons" @onclick="() => stat.Tons = Math.Max(0, stat.Tons - 1)">−</button>
+                                <span class="stepper-value">@stat.Tons</span>
+                                <button type="button" class="stepper-btn" aria-label="Increase tons" @onclick="() => stat.Tons++">+</button>
+                            </div>
                         </div>
-                        <div class="col-6 col-sm-4">
-                            <label class="form-label mb-1 small">Maximums (@MaximumScore)</label>
-                            <input type="number" class="form-control form-control-sm" min="0" @bind="stat.Maximums" />
+                        <div class="stat-stepper-group">
+                            <span class="stat-stepper-label">@MaximumScore</span>
+                            <div class="stat-stepper">
+                                <button type="button" class="stepper-btn" aria-label="Decrease maximums" @onclick="() => stat.Maximums = Math.Max(0, stat.Maximums - 1)">−</button>
+                                <span class="stepper-value">@stat.Maximums</span>
+                                <button type="button" class="stepper-btn" aria-label="Increase maximums" @onclick="() => stat.Maximums++">+</button>
+                            </div>
                         </div>
                     </div>
                 }
@@ -63,6 +68,22 @@
     [Parameter, EditorRequired] public UpdateMatchDto Match { get; set; } = null!;
     [Parameter] public int MatchNumber { get; set; } = 1;
     [Parameter] public int MaximumScore { get; set; } = 180;
+
+    private record ScoreOption(int Won, int Lost, string Label, string Theme);
+
+    private static readonly List<ScoreOption> ScoreOptions = new()
+    {
+        new(2, 0, "Win", "win"),
+        new(2, 1, "Win", "win-close"),
+        new(1, 2, "Loss", "loss-close"),
+        new(0, 2, "Loss", "loss"),
+    };
+
+    private void SetScore(int won, int lost)
+    {
+        Match.LegsWon = won;
+        Match.LegsLost = lost;
+    }
 
     private void OnPlayerIdsChanged(List<int> updatedIds)
     {
