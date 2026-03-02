@@ -352,7 +352,16 @@ public class DashboardService : IDashboardService
                     PlayerName = playerName,
                     ManOfTheMatchCount = motmLookup.GetValueOrDefault(playerId, 0),
                     MatchTypeBreakdowns = matchTypeBreakdowns,
-                    TopPairings = topPairings
+                    TopPairings = topPairings,
+                    RecentResults = playerGroup
+                        .OrderBy(mp => mp.Match.GameNight.Date)
+                        .ThenBy(mp => mp.Match.Id)
+                        .Select(mp => new PlayerRecentResultDto
+                        {
+                            MatchTypeName = mp.Match.MatchType.Name,
+                            Won = mp.Match.Won
+                        })
+                        .ToList()
                 };
             })
             .OrderBy(p => p.PlayerName)
