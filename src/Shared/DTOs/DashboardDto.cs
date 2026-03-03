@@ -115,8 +115,12 @@ public class PlayerMatchTypeBreakdownDto
 
 public class TopPairingDto
 {
+    public int PartnerId { get; set; }
     public string PartnerName { get; set; } = string.Empty;
     public int MatchesPlayed { get; set; }
     public int MatchesWon { get; set; }
+    public int LegsWon { get; set; }
+    public int LegsLost { get; set; }
     public double WinRatio { get; set; }
+    public List<bool> RecentForm { get; set; } = new();
 }

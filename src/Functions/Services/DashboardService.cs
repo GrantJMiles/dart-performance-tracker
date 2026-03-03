@@ -323,23 +323,40 @@ public class DashboardService : IDashboardService
                     .Select(x => x.Breakdown)
                     .ToList();
 
-                var matchIds = playerGroup.Select(mp => mp.MatchId).ToHashSet();
+                var pairsMatchIds = playerGroup
+                    .Where(mp => mp.Match.MatchType.PlayersPerSide == 2)
+                    .Select(mp => mp.MatchId)
+                    .ToHashSet();
+
                 var coPlayers = matchPlayers
-                    .Where(mp => matchIds.Contains(mp.MatchId) && mp.PlayerId != playerId)
+                    .Where(mp => pairsMatchIds.Contains(mp.MatchId) && mp.PlayerId != playerId)
                     .ToList();
 
                 var topPairings = coPlayers
                     .GroupBy(mp => mp.PlayerId)
                     .Select(g =>
                     {
+                        var partnerId = g.Key;
                         var played = g.Count();
                         var won = g.Count(mp => mp.Match.Won);
+                        var legsWon = g.Sum(mp => mp.Match.LegsWon);
+                        var legsLost = g.Sum(mp => mp.Match.LegsLost);
+                        var recentForm = g
+                            .OrderBy(mp => mp.Match.GameNight.Date)
+                            .ThenBy(mp => mp.Match.Id)
+                            .Select(mp => mp.Match.Won)
+                            .TakeLast(5)
+                            .ToList();
                         return new TopPairingDto
                         {
+                            PartnerId = partnerId,
                             PartnerName = g.First().Player.Name,
                             MatchesPlayed = played,
                             MatchesWon = won,
-                            WinRatio = played > 0 ? Math.Round((double)won / played * 100, 1) : 0
+                            LegsWon = legsWon,
+                            LegsLost = legsLost,
+                            WinRatio = played > 0 ? Math.Round((double)won / played * 100, 1) : 0,
+                            RecentForm = recentForm
                         };
                     })
                     .OrderByDescending(p => p.WinRatio)

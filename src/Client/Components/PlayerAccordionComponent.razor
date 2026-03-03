@@ -14,122 +14,165 @@
 
         @* Desktop table (hidden on mobile) *@
         <div class="player-table-desktop">
-            @* Header row *@
-            <div class="player-accordion-header-row">
-                <span class="player-col-name">Player</span>
-                <span class="player-col-form">Form</span>
-                <span class="player-col-stat">Played</span>
-                <span class="player-col-stat">Won</span>
-                <span class="player-col-stat">Win%</span>
-                <span class="player-col-stat">Tons</span>
-                <span class="player-col-stat">@($"{MaximumScore}s")</span>
-                <span class="player-col-stat">+/-</span>
-                <span class="player-col-motm">MOTM</span>
-            </div>
-
-            @foreach (var player in GetFilteredPlayers())
+            @if (activeTab != "pairs")
             {
-                var breakdowns = GetBreakdowns(player).ToList();
-                var totalPlayed = breakdowns.Sum(b => b.MatchesPlayed);
-                var totalWon = breakdowns.Sum(b => b.MatchesWon);
-                var totalTons = breakdowns.Sum(b => b.Tons);
-                var totalMaximums = breakdowns.Sum(b => b.Maximums);
-                var totalLegsWon = breakdowns.Sum(b => b.LegsWon);
-                var totalLegsLost = breakdowns.Sum(b => b.LegsLost);
-                var legsDiff = totalLegsWon - totalLegsLost;
-                var winPct = totalPlayed > 0 ? Math.Round((double)totalWon / totalPlayed * 100, 0) : 0;
-                var isExpanded = expandedPlayerId == player.PlayerId;
-                var recentForm = GetRecentForm(player);
-
-                <div class="player-accordion-row @(isExpanded ? "expanded" : "")"
-                     @onclick="() => TogglePlayer(player.PlayerId)"
-                     style="cursor: pointer;">
-                    <span class="player-col-name" style="font-weight: 600;">@player.PlayerName</span>
-                    <span class="player-col-form">
-                        @foreach (var r in recentForm)
-                        {
-                            <span class="player-form-pip @(r.Won ? "pip-won" : "pip-lost")">@(r.Won ? "W" : "L")</span>
-                        }
-                    </span>
-                    <span class="player-col-stat">@totalPlayed</span>
-                    <span class="player-col-stat">@totalWon</span>
-                    <span class="player-col-stat">
-                        <span style="color: @(winPct >= 50 ? "var(--color-won, #4caf82)" : "var(--color-lost, #e05c5c)"); font-weight: 600;">@winPct%</span>
-                    </span>
-                    <span class="player-col-stat">@totalTons</span>
-                    <span class="player-col-stat">@totalMaximums</span>
-                    <span class="player-col-stat">
-                        <span style="color: @(legsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(legsDiff >= 0 ? "+" : "")@legsDiff</span>
-                    </span>
-                    @if (activeTab == "overall")
-                    {
-                        <span class="player-col-motm">@(player.ManOfTheMatchCount > 0 ? $"⭐ {player.ManOfTheMatchCount}" : "—")</span>
-                    }
-                    else
-                    {
-                        <span class="player-col-motm"></span>
-                    }
+                @* Header row for Overall / Singles *@
+                <div class="player-accordion-header-row">
+                    <span class="player-col-name">Player</span>
+                    <span class="player-col-form">Form</span>
+                    <span class="player-col-stat">Played</span>
+                    <span class="player-col-stat">Won</span>
+                    <span class="player-col-stat">Win%</span>
+                    <span class="player-col-stat">Tons</span>
+                    <span class="player-col-stat">@($"{MaximumScore}s")</span>
+                    <span class="player-col-stat">+/-</span>
+                    <span class="player-col-motm">MOTM</span>
                 </div>
 
-                @if (isExpanded)
+                @foreach (var player in GetFilteredPlayers())
                 {
-                    <div class="player-accordion-detail">
-                        @if (breakdowns.Any())
-                        {
-                            <p style="font-size: 0.83rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--neutral-foreground-hint);">Match Type Breakdown</p>
-                            <table style="width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-bottom: 0.75rem;">
-                                <thead>
-                                    <tr style="border-bottom: 1px solid var(--neutral-stroke-rest);">
-                                        <th style="padding: 4px 8px; text-align: left;">Type</th>
-                                        <th style="padding: 4px 8px;">Played</th>
-                                        <th style="padding: 4px 8px;">Won</th>
-                                        <th style="padding: 4px 8px;">Win%</th>
-                                        <th style="padding: 4px 8px;">Legs W</th>
-                                        <th style="padding: 4px 8px;">Legs L</th>
-                                        <th style="padding: 4px 8px;">+/-</th>
-                                        <th style="padding: 4px 8px;">Tons</th>
-                                        <th style="padding: 4px 8px;">@($"{MaximumScore}s")</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var breakdown in breakdowns)
-                                    {
-                                        var bWinPct = breakdown.MatchesPlayed > 0
-                                            ? Math.Round((double)breakdown.MatchesWon / breakdown.MatchesPlayed * 100, 0)
-                                            : 0;
-                                        var bLegsDiff = breakdown.LegsWon - breakdown.LegsLost;
-                                        <tr style="border-bottom: 1px solid var(--neutral-stroke-rest);">
-                                            <td style="padding: 4px 8px;">@breakdown.MatchTypeName</td>
-                                            <td style="padding: 4px 8px; text-align: center;">@breakdown.MatchesPlayed</td>
-                                            <td style="padding: 4px 8px; text-align: center;">@breakdown.MatchesWon</td>
-                                            <td style="padding: 4px 8px; text-align: center;">
-                                                <span class="win-pct-badge @(bWinPct >= 50 ? "badge-won" : "badge-lost")">@bWinPct%</span>
-                                            </td>
-                                            <td style="padding: 4px 8px; text-align: center;">@breakdown.LegsWon</td>
-                                            <td style="padding: 4px 8px; text-align: center;">@breakdown.LegsLost</td>
-                                            <td style="padding: 4px 8px; text-align: center; color: @(bLegsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(bLegsDiff >= 0 ? "+" : "")@bLegsDiff</td>
-                                            <td style="padding: 4px 8px; text-align: center;">@breakdown.Tons</td>
-                                            <td style="padding: 4px 8px; text-align: center;">@breakdown.Maximums</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        }
+                    var breakdowns = GetBreakdowns(player).ToList();
+                    var totalPlayed = breakdowns.Sum(b => b.MatchesPlayed);
+                    var totalWon = breakdowns.Sum(b => b.MatchesWon);
+                    var totalTons = breakdowns.Sum(b => b.Tons);
+                    var totalMaximums = breakdowns.Sum(b => b.Maximums);
+                    var totalLegsWon = breakdowns.Sum(b => b.LegsWon);
+                    var totalLegsLost = breakdowns.Sum(b => b.LegsLost);
+                    var legsDiff = totalLegsWon - totalLegsLost;
+                    var winPct = totalPlayed > 0 ? Math.Round((double)totalWon / totalPlayed * 100, 0) : 0;
+                    var isExpanded = expandedPlayerId == player.PlayerId;
+                    var recentForm = GetRecentForm(player);
 
-                        @if (player.TopPairings.Any())
+                    <div class="player-accordion-row @(isExpanded ? "expanded" : "")"
+                         @onclick="() => TogglePlayer(player.PlayerId)"
+                         style="cursor: pointer;">
+                        <span class="player-col-name" style="font-weight: 600;">@player.PlayerName</span>
+                        <span class="player-col-form">
+                            @foreach (var r in recentForm)
+                            {
+                                <span class="player-form-pip @(r.Won ? "pip-won" : "pip-lost")">@(r.Won ? "W" : "L")</span>
+                            }
+                        </span>
+                        <span class="player-col-stat">@totalPlayed</span>
+                        <span class="player-col-stat">@totalWon</span>
+                        <span class="player-col-stat">
+                            <span style="color: @(winPct >= 50 ? "var(--color-won, #4caf82)" : "var(--color-lost, #e05c5c)"); font-weight: 600;">@winPct%</span>
+                        </span>
+                        <span class="player-col-stat">@totalTons</span>
+                        <span class="player-col-stat">@totalMaximums</span>
+                        <span class="player-col-stat">
+                            <span style="color: @(legsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(legsDiff >= 0 ? "+" : "")@legsDiff</span>
+                        </span>
+                        @if (activeTab == "overall")
                         {
-                            <p style="font-size: 0.83rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--neutral-foreground-hint);">Pairings</p>
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                @foreach (var pairing in player.TopPairings)
-                                {
-                                    <div style="padding: 0.5rem; border-radius: 6px; background: rgba(255,255,255,0.05); min-width: 140px;">
-                                        <div style="font-weight: 600; font-size: 0.875rem;">@pairing.PartnerName</div>
-                                        <div style="color: var(--neutral-foreground-hint); font-size: 0.78rem;">@pairing.MatchesWon W / @pairing.MatchesPlayed played</div>
-                                        <span class="win-pct-badge @(pairing.WinRatio >= 50 ? "badge-won" : "badge-lost")">@pairing.WinRatio%</span>
-                                    </div>
-                                }
-                            </div>
+                            <span class="player-col-motm">@(player.ManOfTheMatchCount > 0 ? $"⭐ {player.ManOfTheMatchCount}" : "—")</span>
                         }
+                        else
+                        {
+                            <span class="player-col-motm"></span>
+                        }
+                    </div>
+
+                    @if (isExpanded)
+                    {
+                        <div class="player-accordion-detail">
+                            @if (breakdowns.Any())
+                            {
+                                <p style="font-size: 0.83rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--neutral-foreground-hint);">Match Type Breakdown</p>
+                                <table style="width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-bottom: 0.75rem;">
+                                    <thead>
+                                        <tr style="border-bottom: 1px solid var(--neutral-stroke-rest);">
+                                            <th style="padding: 4px 8px; text-align: left;">Type</th>
+                                            <th style="padding: 4px 8px;">Played</th>
+                                            <th style="padding: 4px 8px;">Won</th>
+                                            <th style="padding: 4px 8px;">Win%</th>
+                                            <th style="padding: 4px 8px;">Legs W</th>
+                                            <th style="padding: 4px 8px;">Legs L</th>
+                                            <th style="padding: 4px 8px;">+/-</th>
+                                            <th style="padding: 4px 8px;">Tons</th>
+                                            <th style="padding: 4px 8px;">@($"{MaximumScore}s")</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var breakdown in breakdowns)
+                                        {
+                                            var bWinPct = breakdown.MatchesPlayed > 0
+                                                ? Math.Round((double)breakdown.MatchesWon / breakdown.MatchesPlayed * 100, 0)
+                                                : 0;
+                                            var bLegsDiff = breakdown.LegsWon - breakdown.LegsLost;
+                                            <tr style="border-bottom: 1px solid var(--neutral-stroke-rest);">
+                                                <td style="padding: 4px 8px;">@breakdown.MatchTypeName</td>
+                                                <td style="padding: 4px 8px; text-align: center;">@breakdown.MatchesPlayed</td>
+                                                <td style="padding: 4px 8px; text-align: center;">@breakdown.MatchesWon</td>
+                                                <td style="padding: 4px 8px; text-align: center;">
+                                                    <span class="win-pct-badge @(bWinPct >= 50 ? "badge-won" : "badge-lost")">@bWinPct%</span>
+                                                </td>
+                                                <td style="padding: 4px 8px; text-align: center;">@breakdown.LegsWon</td>
+                                                <td style="padding: 4px 8px; text-align: center;">@breakdown.LegsLost</td>
+                                                <td style="padding: 4px 8px; text-align: center; color: @(bLegsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(bLegsDiff >= 0 ? "+" : "")@bLegsDiff</td>
+                                                <td style="padding: 4px 8px; text-align: center;">@breakdown.Tons</td>
+                                                <td style="padding: 4px 8px; text-align: center;">@breakdown.Maximums</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+
+                            @if (activeTab == "overall" && player.TopPairings.Any())
+                            {
+                                <p style="font-size: 0.83rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--neutral-foreground-hint);">Pairings</p>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    @foreach (var pairing in player.TopPairings)
+                                    {
+                                        <div style="padding: 0.5rem; border-radius: 6px; background: rgba(255,255,255,0.05); min-width: 140px;">
+                                            <div style="font-weight: 600; font-size: 0.875rem;">@pairing.PartnerName</div>
+                                            <div style="color: var(--neutral-foreground-hint); font-size: 0.78rem;">@pairing.MatchesWon W / @pairing.MatchesPlayed played</div>
+                                            <span class="win-pct-badge @(pairing.WinRatio >= 50 ? "badge-won" : "badge-lost")">@pairing.WinRatio%</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            }
+            else
+            {
+                @* Pairs tab — show unique pair groups *@
+                <div class="player-pair-header-row">
+                    <span class="player-col-name">Pair</span>
+                    <span class="player-col-form">Form</span>
+                    <span class="player-col-stat">Played</span>
+                    <span class="player-col-stat">Won</span>
+                    <span class="player-col-stat">Win%</span>
+                    <span class="player-col-stat">Legs W</span>
+                    <span class="player-col-stat">Legs L</span>
+                    <span class="player-col-stat">+/-</span>
+                </div>
+
+                @foreach (var pair in GetPairGroups())
+                {
+                    var pairWinPct = pair.MatchesPlayed > 0 ? Math.Round((double)pair.MatchesWon / pair.MatchesPlayed * 100, 0) : 0;
+                    var pairLegsDiff = pair.LegsWon - pair.LegsLost;
+
+                    <div class="player-pair-row">
+                        <span class="player-col-name" style="font-weight: 600;">@pair.PairName</span>
+                        <span class="player-col-form">
+                            @foreach (var won in pair.RecentForm)
+                            {
+                                <span class="player-form-pip @(won ? "pip-won" : "pip-lost")">@(won ? "W" : "L")</span>
+                            }
+                        </span>
+                        <span class="player-col-stat">@pair.MatchesPlayed</span>
+                        <span class="player-col-stat">@pair.MatchesWon</span>
+                        <span class="player-col-stat">
+                            <span style="color: @(pairWinPct >= 50 ? "var(--color-won, #4caf82)" : "var(--color-lost, #e05c5c)"); font-weight: 600;">@pairWinPct%</span>
+                        </span>
+                        <span class="player-col-stat">@pair.LegsWon</span>
+                        <span class="player-col-stat">@pair.LegsLost</span>
+                        <span class="player-col-stat">
+                            <span style="color: @(pairLegsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(pairLegsDiff >= 0 ? "+" : "")@pairLegsDiff</span>
+                        </span>
                     </div>
                 }
             }
@@ -137,19 +180,39 @@
 
         @* Mobile card list (shown on small screens) *@
         <div class="player-mobile-list">
-            @foreach (var player in GetFilteredPlayers())
+            @if (activeTab != "pairs")
             {
-                var recentForm = GetRecentForm(player);
-                <div class="player-mobile-card" @onclick="() => OpenPlayerModal(player.PlayerId)">
-                    <span class="player-mobile-name">@player.PlayerName</span>
-                    <div class="player-mobile-form">
-                        @foreach (var r in recentForm)
-                        {
-                            <span class="player-form-pip @(r.Won ? "pip-won" : "pip-lost")">@(r.Won ? "W" : "L")</span>
-                        }
+                @foreach (var player in GetFilteredPlayers())
+                {
+                    var recentForm = GetRecentForm(player);
+                    <div class="player-mobile-card" @onclick="() => OpenPlayerModal(player.PlayerId)">
+                        <span class="player-mobile-name">@player.PlayerName</span>
+                        <div class="player-mobile-form">
+                            @foreach (var r in recentForm)
+                            {
+                                <span class="player-form-pip @(r.Won ? "pip-won" : "pip-lost")">@(r.Won ? "W" : "L")</span>
+                            }
+                        </div>
+                        <span class="player-mobile-chevron">›</span>
                     </div>
-                    <span class="player-mobile-chevron">›</span>
-                </div>
+                }
+            }
+            else
+            {
+                @foreach (var pair in GetPairGroups())
+                {
+                    var pairWinPct = pair.MatchesPlayed > 0 ? Math.Round((double)pair.MatchesWon / pair.MatchesPlayed * 100, 0) : 0;
+                    <div class="player-mobile-card" style="cursor: default;">
+                        <span class="player-mobile-name">@pair.PairName</span>
+                        <div class="player-mobile-form">
+                            @foreach (var won in pair.RecentForm)
+                            {
+                                <span class="player-form-pip @(won ? "pip-won" : "pip-lost")">@(won ? "W" : "L")</span>
+                            }
+                        </div>
+                        <span style="font-size: 0.78rem; color: @(pairWinPct >= 50 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600; flex-shrink: 0;">@pairWinPct%</span>
+                    </div>
+                }
             }
         </div>
     </div>
@@ -248,7 +311,7 @@
                     </table>
                 }
 
-                @if (mp.TopPairings.Any())
+                @if (activeTab == "overall" && mp.TopPairings.Any())
                 {
                     <p style="font-size: 0.83rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--neutral-foreground-hint);">Pairings</p>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
@@ -345,6 +408,29 @@
 
     .player-form-pip.pip-won { background: var(--color-won, #4caf82); color: #fff; }
     .player-form-pip.pip-lost { background: var(--color-lost, #e05c5c); color: #fff; }
+
+    .player-pair-header-row,
+    .player-pair-row {
+        display: grid;
+        grid-template-columns: 1fr 90px 60px 50px 60px 55px 55px 55px;
+        align-items: center;
+        padding: 8px 4px;
+        gap: 4px;
+    }
+
+    .player-pair-header-row {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--neutral-foreground-hint, #aaa);
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+        padding-bottom: 6px;
+        margin-bottom: 2px;
+    }
+
+    .player-pair-row {
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        font-size: 0.88rem;
+    }
 
     .player-accordion-detail {
         padding: 10px 4px 14px 8px;
@@ -476,7 +562,52 @@
     private IEnumerable<TeamPlayerSeasonStatsDto> GetFilteredPlayers()
     {
         if (Players == null) return Enumerable.Empty<TeamPlayerSeasonStatsDto>();
-        if (activeTab == "overall") return Players;
+        if (activeTab == "overall")
+        {
+            return Players.OrderByDescending(p =>
+            {
+                var breakdowns = p.MatchTypeBreakdowns;
+                var played = breakdowns.Sum(b => b.MatchesPlayed);
+                var won = breakdowns.Sum(b => b.MatchesWon);
+                return played > 0 ? (double)won / played : 0;
+            });
+        }
         return Players.Where(p => GetBreakdowns(p).Any());
+    }
+
+    private record PairGroupViewModel(
+        string PairName,
+        int MatchesPlayed,
+        int MatchesWon,
+        int LegsWon,
+        int LegsLost,
+        List<bool> RecentForm);
+
+    private IEnumerable<PairGroupViewModel> GetPairGroups()
+    {
+        if (Players == null) return [];
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var groups = new List<PairGroupViewModel>();
+        foreach (var player in Players)
+        {
+            foreach (var pairing in player.TopPairings)
+            {
+                var key = string.Compare(player.PlayerName, pairing.PartnerName, StringComparison.OrdinalIgnoreCase) <= 0
+                    ? $"{player.PlayerName}/{pairing.PartnerName}"
+                    : $"{pairing.PartnerName}/{player.PlayerName}";
+                if (!seen.Add(key)) continue;
+                groups.Add(new PairGroupViewModel(
+                    key,
+                    pairing.MatchesPlayed,
+                    pairing.MatchesWon,
+                    pairing.LegsWon,
+                    pairing.LegsLost,
+                    pairing.RecentForm));
+            }
+        }
+        return groups
+            .Where(g => g.MatchesPlayed > 0)
+            .OrderByDescending(g => (double)g.MatchesWon / g.MatchesPlayed)
+            .ThenByDescending(g => g.MatchesWon);
     }
 }
