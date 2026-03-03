@@ -324,7 +324,7 @@ public class DashboardService : IDashboardService
                     .ToList();
 
                 var pairsMatchIds = playerGroup
-                    .Where(mp => mp.Match.MatchType.Name is "Pairs" or "Blind Pairs")
+                    .Where(mp => mp.Match.MatchType.PlayersPerSide == 2)
                     .Select(mp => mp.MatchId)
                     .ToHashSet();
 
