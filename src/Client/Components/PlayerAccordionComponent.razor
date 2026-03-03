@@ -154,8 +154,9 @@
                 {
                     var pairWinPct = pair.MatchesPlayed > 0 ? Math.Round((double)pair.MatchesWon / pair.MatchesPlayed * 100, 0) : 0;
                     var pairLegsDiff = pair.LegsWon - pair.LegsLost;
+                    var capturedPair = pair;
 
-                    <div class="player-pair-row">
+                    <div class="player-pair-row" @onclick="() => OpenPairModal(capturedPair)">
                         <span class="player-col-name" style="font-weight: 600;">@pair.PairName</span>
                         <span class="player-col-form">
                             @foreach (var won in pair.RecentForm)
@@ -202,7 +203,8 @@
                 @foreach (var pair in GetPairGroups())
                 {
                     var pairWinPct = pair.MatchesPlayed > 0 ? Math.Round((double)pair.MatchesWon / pair.MatchesPlayed * 100, 0) : 0;
-                    <div class="player-mobile-card" style="cursor: default;">
+                    var capturedPair = pair;
+                    <div class="player-mobile-card" @onclick="() => OpenPairModal(capturedPair)">
                         <span class="player-mobile-name">@pair.PairName</span>
                         <div class="player-mobile-form">
                             @foreach (var won in pair.RecentForm)
@@ -211,11 +213,69 @@
                             }
                         </div>
                         <span style="font-size: 0.78rem; color: @(pairWinPct >= 50 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600; flex-shrink: 0;">@pairWinPct%</span>
+                        <span class="player-mobile-chevron">›</span>
                     </div>
                 }
             }
         </div>
     </div>
+}
+
+@* Pair detail modal *@
+@if (modalPair != null)
+{
+    var mpWinPct = modalPair.MatchesPlayed > 0 ? Math.Round((double)modalPair.MatchesWon / modalPair.MatchesPlayed * 100, 0) : 0;
+    var mpLegsDiff = modalPair.LegsWon - modalPair.LegsLost;
+
+    <FluentDialog Hidden="false" Modal="true" TrapFocus="true"
+                  OnDismiss="ClosePairModal"
+                  Style="width: min(92vw, 480px);">
+        <FluentDialogHeader>
+            <strong>@modalPair.PairName</strong>
+        </FluentDialogHeader>
+        <FluentDialogBody>
+            <div class="player-modal-stats">
+                <div class="player-modal-stat">
+                    <span class="player-modal-stat-value">@modalPair.MatchesPlayed</span>
+                    <span class="player-modal-stat-label">Played</span>
+                </div>
+                <div class="player-modal-stat">
+                    <span class="player-modal-stat-value">@modalPair.MatchesWon</span>
+                    <span class="player-modal-stat-label">Won</span>
+                </div>
+                <div class="player-modal-stat">
+                    <span class="player-modal-stat-value" style="color: @(mpWinPct >= 50 ? "var(--color-won)" : "var(--color-lost)")">@mpWinPct%</span>
+                    <span class="player-modal-stat-label">Win%</span>
+                </div>
+                <div class="player-modal-stat">
+                    <span class="player-modal-stat-value">@modalPair.LegsWon</span>
+                    <span class="player-modal-stat-label">Legs W</span>
+                </div>
+                <div class="player-modal-stat">
+                    <span class="player-modal-stat-value">@modalPair.LegsLost</span>
+                    <span class="player-modal-stat-label">Legs L</span>
+                </div>
+                <div class="player-modal-stat">
+                    <span class="player-modal-stat-value" style="color: @(mpLegsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)")">@(mpLegsDiff >= 0 ? "+" : "")@mpLegsDiff</span>
+                    <span class="player-modal-stat-label">+/-</span>
+                </div>
+            </div>
+
+            @if (modalPair.RecentForm.Any())
+            {
+                <p style="font-size: 0.83rem; font-weight: 600; margin: 0.75rem 0 0.25rem; color: var(--neutral-foreground-hint);">Recent Form</p>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                    @foreach (var won in modalPair.RecentForm)
+                    {
+                        <span class="player-form-pip @(won ? "pip-won" : "pip-lost")">@(won ? "W" : "L")</span>
+                    }
+                </div>
+            }
+        </FluentDialogBody>
+        <FluentDialogFooter>
+            <FluentButton Appearance="Appearance.Outline" @onclick="ClosePairModal">Close</FluentButton>
+        </FluentDialogFooter>
+    </FluentDialog>
 }
 
 @* Player detail modal (mobile) *@
@@ -430,6 +490,13 @@
     .player-pair-row {
         border-bottom: 1px solid rgba(255,255,255,0.06);
         font-size: 0.88rem;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    .player-pair-row:hover {
+        background: rgba(255,255,255,0.04);
+        border-radius: 6px;
     }
 
     .player-accordion-detail {
@@ -524,6 +591,7 @@
     private int? expandedPlayerId;
     private string activeTab = "overall";
     private int? modalPlayerId;
+    private PairGroupViewModel? modalPair;
 
     private void TogglePlayer(int playerId)
     {
@@ -538,6 +606,9 @@
 
     private void OpenPlayerModal(int playerId) => modalPlayerId = playerId;
     private void ClosePlayerModal() => modalPlayerId = null;
+
+    private void OpenPairModal(PairGroupViewModel pair) => modalPair = pair;
+    private void ClosePairModal() => modalPair = null;
 
     private IEnumerable<PlayerMatchTypeBreakdownDto> GetBreakdowns(TeamPlayerSeasonStatsDto player)
     {
