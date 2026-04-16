@@ -200,6 +200,12 @@ else if (step == Step.Done)
         seasons = seasonsTask.Result ?? new();
         players = playersTask.Result ?? new();
 
+        if (seasons.Any())
+        {
+            selectedSeason = seasons.First();
+            orderedConfigs = selectedSeason.MatchConfigurations.OrderBy(c => c.OrderIndex).ToList();
+        }
+
         if (Id.HasValue && Id > 0)
             await ResumeGameNight(Id.Value);
     }

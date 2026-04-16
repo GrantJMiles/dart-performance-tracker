@@ -307,7 +307,7 @@
             selectedTeamId = teams.First().Id;
 
         if (seasons != null && seasons.Any())
-            selectedSeasonId = seasons.Last().Id;
+            selectedSeasonId = seasons.First().Id;
 
         await LoadDashboard();
     }
