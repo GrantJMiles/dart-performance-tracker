@@ -133,6 +133,7 @@ a:hover {
     margin-bottom: 1.5rem;
     gap: 1rem;
     flex-wrap: wrap;
+    min-height: 80px;
 }
 
 .dashboard-title {
@@ -145,6 +146,10 @@ a:hover {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+}
+
+.dashboard-selectors fluent-select::part(listbox) {
+    z-index: 1000;
 }
 
 /* Stat Cards */
