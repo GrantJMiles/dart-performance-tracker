@@ -1,14 +1,17 @@
 @using DartPerformanceTracker.Shared.DTOs
 
-@if (Visible && GameNight != null)
-{
-    <FluentDialog Hidden="@(!Visible)" Modal="true" TrapFocus="true"
-                  OnDismiss="@(() => OnClose.InvokeAsync())"
-                  Style="width: min(90vw, 700px);">
-        <FluentDialogHeader>
+<FluentDialog Hidden="@(!Visible || GameNight == null)" Modal="true" TrapFocus="true"
+              OnDismiss="@(() => OnClose.InvokeAsync())"
+              Style="width: min(90vw, 700px);">
+    <FluentDialogHeader>
+        @if (GameNight != null)
+        {
             <strong>@GameNight.Date.ToString("dd MMM yyyy") vs @GameNight.Opponent @(GameNight.IsHome ? "🏠" : "✈️")</strong>
-        </FluentDialogHeader>
-        <FluentDialogBody>
+        }
+    </FluentDialogHeader>
+    <FluentDialogBody>
+        @if (GameNight != null)
+        {
             @if (!GameNight.Matches.Any())
             {
                 <p style="color: var(--neutral-foreground-hint);">No match data recorded.</p>
@@ -75,12 +78,12 @@
                     </div>
                 }
             }
-        </FluentDialogBody>
-        <FluentDialogFooter>
-            <FluentButton Appearance="Appearance.Outline" @onclick="@(() => OnClose.InvokeAsync())">Close</FluentButton>
-        </FluentDialogFooter>
-    </FluentDialog>
-}
+        }
+    </FluentDialogBody>
+    <FluentDialogFooter>
+        <FluentButton Appearance="Appearance.Outline" @onclick="@(() => OnClose.InvokeAsync())">Close</FluentButton>
+    </FluentDialogFooter>
+</FluentDialog>
 
 @code {
     [Parameter] public GameNightDto? GameNight { get; set; }
