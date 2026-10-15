@@ -45,6 +45,15 @@
                                     </span>
                                 </td>
                             </tr>
+                            @if (match.Checkouts.Any())
+                            {
+                                <tr style="background: var(--neutral-fill-stealth-rest);">
+                                    <td></td>
+                                    <td colspan="4" style="padding: 4px 8px; font-size: 0.8rem; color: var(--neutral-foreground-hint);">
+                                        Checkouts: @string.Join(", ", match.Checkouts.Select(c => c.Score.HasValue ? $"{c.PlayerName} {c.Score}" : c.PlayerName))
+                                    </td>
+                                </tr>
+                            }
                             @if (match.PlayerStats.Any(ps => ps.Tons > 0 || ps.Maximums > 0))
                             {
                                 <tr style="background: var(--neutral-fill-stealth-rest);">

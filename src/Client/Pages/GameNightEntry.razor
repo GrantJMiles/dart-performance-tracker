@@ -68,7 +68,8 @@ else if (step == Step.Matches && createdGameNight != null)
         Players="players"
         Match="matchEdits[currentMatchIndex]"
         MatchNumber="currentMatchIndex + 1"
-        MaximumScore="selectedSeason?.MaximumScore ?? 180" />
+        MaximumScore="selectedSeason?.MaximumScore ?? 180"
+        MaximumCheckout="selectedSeason?.MaximumCheckout ?? 170" />
 
     @if (!string.IsNullOrEmpty(message))
     {
@@ -118,6 +119,13 @@ else if (step == Step.Review && createdGameNight != null)
                             <span style="color: var(--neutral-foreground-hint);">Tons: <strong>@stats.Tons</strong></span>
                             <span style="color: var(--neutral-foreground-hint);">180s: <strong>@stats.Maximums</strong></span>
                         }
+                    </div>
+                }
+                @if (match.Checkouts.Any())
+                {
+                    <div style="font-size: 0.875rem; margin-top: 0.25rem; color: var(--neutral-foreground-hint);">
+                        Checkouts:
+                        <strong>@string.Join(", ", match.Checkouts.Select(c => c.Score.HasValue ? $"{c.PlayerName} {c.Score}" : c.PlayerName))</strong>
                     </div>
                 }
             }
@@ -230,6 +238,11 @@ else if (step == Step.Done)
                 PlayerId = ps.PlayerId,
                 Tons = ps.Tons,
                 Maximums = ps.Maximums
+            }).ToList(),
+            Checkouts = m.Checkouts.Select(c => new CreateLegCheckoutDto
+            {
+                PlayerId = c.PlayerId,
+                Score = c.Score
             }).ToList()
         }).ToList();
 

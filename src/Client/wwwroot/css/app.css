@@ -717,3 +717,46 @@ a:hover {
 @media (max-width: 400px) {
     .score-picker { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ============================================================
+   Match Entry — Checkouts
+   ============================================================ */
+.checkout-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+}
+
+.checkout-row:last-child { border-bottom: none; }
+.checkout-leg-label { font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); min-width: 44px; }
+.checkout-player-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; flex: 1; }
+
+.checkout-player-btn {
+    min-height: 44px;
+    padding: 0 1rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.checkout-player-btn.selected { border-color: var(--color-accent); background: var(--color-accent); color: white; }
+
+.checkout-input {
+    width: 84px;
+    min-height: 44px;
+    padding: 0 0.5rem;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+}

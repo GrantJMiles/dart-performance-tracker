@@ -13,4 +13,5 @@ public class Match
     public int OrderIndex { get; set; }
     public ICollection<MatchPlayer> MatchPlayers { get; set; } = new List<MatchPlayer>();
     public ICollection<PlayerMatchStats> PlayerStats { get; set; } = new List<PlayerMatchStats>();
+    public ICollection<LegCheckout> Checkouts { get; set; } = new List<LegCheckout>();
 }

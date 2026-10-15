@@ -19,6 +19,7 @@ public class GameNightService : IGameNightService
         var gn = await _context.GameNights
             .Include(g => g.Matches).ThenInclude(m => m.MatchType)
             .Include(g => g.Matches).ThenInclude(m => m.MatchPlayers)
+            .Include(g => g.Matches).ThenInclude(m => m.Checkouts).ThenInclude(c => c.Player)
             .Include(g => g.Matches).ThenInclude(m => m.PlayerStats).ThenInclude(ps => ps.Player)
             .Include(g => g.ManOfTheMatchAwards)
             .FirstOrDefaultAsync(g => g.Id == id);
@@ -32,6 +33,7 @@ public class GameNightService : IGameNightService
             .Where(gn => !gn.IsComplete)
             .Include(g => g.Matches).ThenInclude(m => m.MatchType)
             .Include(g => g.Matches).ThenInclude(m => m.MatchPlayers)
+            .Include(g => g.Matches).ThenInclude(m => m.Checkouts).ThenInclude(c => c.Player)
             .Include(g => g.Matches).ThenInclude(m => m.PlayerStats)
             .Include(g => g.ManOfTheMatchAwards)
             .OrderByDescending(gn => gn.Date)
@@ -62,7 +64,8 @@ public class GameNightService : IGameNightService
                     PlayerId = ps.PlayerId,
                     Tons = ps.Tons,
                     Maximums = ps.Maximums
-                }).ToList()
+                }).ToList(),
+                Checkouts = ToCheckouts(m.Checkouts)
             }).ToList(),
             ManOfTheMatchAwards = dto.ManOfTheMatchPlayerIds.Select(pid => new ManOfTheMatch { PlayerId = pid }).ToList()
         };
@@ -73,6 +76,7 @@ public class GameNightService : IGameNightService
         var created = await _context.GameNights
             .Include(g => g.Matches).ThenInclude(m => m.MatchType)
             .Include(g => g.Matches).ThenInclude(m => m.MatchPlayers)
+            .Include(g => g.Matches).ThenInclude(m => m.Checkouts).ThenInclude(c => c.Player)
             .Include(g => g.Matches).ThenInclude(m => m.PlayerStats)
             .Include(g => g.ManOfTheMatchAwards)
             .FirstAsync(g => g.Id == gameNight.Id);
@@ -84,6 +88,7 @@ public class GameNightService : IGameNightService
     {
         var gn = await _context.GameNights
             .Include(g => g.Matches).ThenInclude(m => m.MatchPlayers)
+            .Include(g => g.Matches).ThenInclude(m => m.Checkouts).ThenInclude(c => c.Player)
             .Include(g => g.Matches).ThenInclude(m => m.PlayerStats)
             .FirstOrDefaultAsync(g => g.Id == gameNightId);
 
@@ -112,11 +117,15 @@ public class GameNightService : IGameNightService
             })
             .ToList();
 
+        _context.LegCheckouts.RemoveRange(match.Checkouts);
+        match.Checkouts = ToCheckouts(dto.Checkouts, matchId);
+
         await _context.SaveChangesAsync();
 
         var updated = await _context.GameNights
             .Include(g => g.Matches).ThenInclude(m => m.MatchType)
             .Include(g => g.Matches).ThenInclude(m => m.MatchPlayers)
+            .Include(g => g.Matches).ThenInclude(m => m.Checkouts).ThenInclude(c => c.Player)
             .Include(g => g.Matches).ThenInclude(m => m.PlayerStats)
             .Include(g => g.ManOfTheMatchAwards)
             .FirstAsync(g => g.Id == gameNightId);
@@ -130,6 +139,7 @@ public class GameNightService : IGameNightService
             .Include(g => g.ManOfTheMatchAwards)
             .Include(g => g.Matches).ThenInclude(m => m.MatchType)
             .Include(g => g.Matches).ThenInclude(m => m.MatchPlayers)
+            .Include(g => g.Matches).ThenInclude(m => m.Checkouts).ThenInclude(c => c.Player)
             .Include(g => g.Matches).ThenInclude(m => m.PlayerStats)
             .FirstOrDefaultAsync(g => g.Id == gameNightId);
 
@@ -146,11 +156,26 @@ public class GameNightService : IGameNightService
         var updated = await _context.GameNights
             .Include(g => g.Matches).ThenInclude(m => m.MatchType)
             .Include(g => g.Matches).ThenInclude(m => m.MatchPlayers)
+            .Include(g => g.Matches).ThenInclude(m => m.Checkouts).ThenInclude(c => c.Player)
             .Include(g => g.Matches).ThenInclude(m => m.PlayerStats)
             .Include(g => g.ManOfTheMatchAwards)
             .FirstAsync(g => g.Id == gameNightId);
 
         return MapToDto(updated);
+    }
+
+    // Entries without a chosen player are dropped, so a won leg with nothing recorded is simply skipped.
+    private static List<LegCheckout> ToCheckouts(IEnumerable<CreateLegCheckoutDto> checkouts, int matchId = 0)
+    {
+        return checkouts
+            .Where(c => c.PlayerId > 0)
+            .Select(c => new LegCheckout
+            {
+                MatchId = matchId,
+                PlayerId = c.PlayerId,
+                Score = c.Score is > 0 ? c.Score : null
+            })
+            .ToList();
     }
 
     private static GameNightDto MapToDto(GameNight gn)
@@ -182,6 +207,13 @@ public class GameNightService : IGameNightService
                     PlayerName = ps.Player?.Name ?? string.Empty,
                     Tons = ps.Tons,
                     Maximums = ps.Maximums
+                }).ToList(),
+                Checkouts = m.Checkouts.OrderBy(c => c.Id).Select(c => new LegCheckoutDto
+                {
+                    Id = c.Id,
+                    PlayerId = c.PlayerId,
+                    PlayerName = c.Player?.Name ?? string.Empty,
+                    Score = c.Score
                 }).ToList()
             }).ToList(),
             ManOfTheMatchPlayerIds = gn.ManOfTheMatchAwards.Select(m => m.PlayerId).ToList()

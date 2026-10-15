@@ -53,6 +53,32 @@ namespace DartPerformanceTracker.Data.Migrations
                     b.ToTable("GameNights");
                 });
 
+            modelBuilder.Entity("DartPerformanceTracker.Shared.Models.LegCheckout", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MatchId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Score")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("LegCheckouts");
+                });
+
             modelBuilder.Entity("DartPerformanceTracker.Shared.Models.ManOfTheMatch", b =>
                 {
                     b.Property<int>("GameNightId")
@@ -241,6 +267,9 @@ namespace DartPerformanceTracker.Data.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("MaximumCheckout")
+                        .HasColumnType("int");
+
                     b.Property<int>("MaximumScore")
                         .HasColumnType("int");
 
@@ -308,6 +337,25 @@ namespace DartPerformanceTracker.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Season");
+                });
+
+            modelBuilder.Entity("DartPerformanceTracker.Shared.Models.LegCheckout", b =>
+                {
+                    b.HasOne("DartPerformanceTracker.Shared.Models.Match", "Match")
+                        .WithMany("Checkouts")
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DartPerformanceTracker.Shared.Models.Player", "Player")
+                        .WithMany("Checkouts")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Match");
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("DartPerformanceTracker.Shared.Models.ManOfTheMatch", b =>
@@ -425,6 +473,8 @@ namespace DartPerformanceTracker.Data.Migrations
 
             modelBuilder.Entity("DartPerformanceTracker.Shared.Models.Match", b =>
                 {
+                    b.Navigation("Checkouts");
+
                     b.Navigation("MatchPlayers");
 
                     b.Navigation("PlayerStats");
@@ -439,6 +489,8 @@ namespace DartPerformanceTracker.Data.Migrations
 
             modelBuilder.Entity("DartPerformanceTracker.Shared.Models.Player", b =>
                 {
+                    b.Navigation("Checkouts");
+
                     b.Navigation("ManOfTheMatchAwards");
 
                     b.Navigation("MatchPlayers");

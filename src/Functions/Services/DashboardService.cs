@@ -257,11 +257,59 @@ public class DashboardService : IDashboardService
             pairsMvp = pairStats;
         }
 
+        var checkouts = await _context.LegCheckouts
+            .Include(c => c.Player)
+            .Where(c => c.Player.TeamId == teamId && c.Match.GameNight.SeasonId == seasonId)
+            .ToListAsync();
+
+        // Highest checkout: only checkouts that have a score recorded
+        CheckoutLeaderDto? highestCheckout = null;
+        var scored = checkouts.Where(c => c.Score.HasValue).ToList();
+        if (scored.Count > 0)
+        {
+            var best = scored.Max(c => c.Score!.Value);
+            highestCheckout = new CheckoutLeaderDto
+            {
+                Value = best,
+                PlayerNames = scored.Where(c => c.Score == best)
+                    .Select(c => c.Player.Name).Distinct().OrderBy(n => n).ToList()
+            };
+        }
+
+        // Most checkouts: count of legs checked out, ties show every player
+        CheckoutLeaderDto? mostCheckouts = null;
+        var checkoutCounts = checkouts
+            .GroupBy(c => c.PlayerId)
+            .Select(g => new { Name = g.First().Player.Name, Count = g.Count() })
+            .ToList();
+        if (checkoutCounts.Count > 0)
+        {
+            var most = checkoutCounts.Max(c => c.Count);
+            mostCheckouts = new CheckoutLeaderDto
+            {
+                Value = most,
+                PlayerNames = checkoutCounts.Where(c => c.Count == most).Select(c => c.Name).OrderBy(n => n).ToList()
+            };
+        }
+
+        // Players who hit the season's maximum checkout (e.g. 170)
+        var maxCheckoutHits = checkouts
+            .Where(c => c.Score == season.MaximumCheckout)
+            .GroupBy(c => c.PlayerId)
+            .Select(g => new MaxCheckoutHitDto { PlayerName = g.First().Player.Name, Count = g.Count() })
+            .OrderByDescending(h => h.Count)
+            .ThenBy(h => h.PlayerName)
+            .ToList();
+
         return new DashboardInsightsDto
         {
             SinglesMvp = singlesPlayers,
             SeasonMvp = seasonMvp,
-            PairsMvp = pairsMvp
+            PairsMvp = pairsMvp,
+            HighestCheckout = highestCheckout,
+            MostCheckouts = mostCheckouts,
+            MaximumCheckout = season.MaximumCheckout,
+            MaxCheckoutHits = maxCheckoutHits
         };
     }
 
@@ -278,6 +326,7 @@ public class DashboardService : IDashboardService
             .Include(mp => mp.Match).ThenInclude(m => m.MatchType)
             .Include(mp => mp.Match).ThenInclude(m => m.GameNight)
             .Include(mp => mp.Match).ThenInclude(m => m.PlayerStats)
+            .Include(mp => mp.Match).ThenInclude(m => m.Checkouts)
             .Where(mp => mp.Player.TeamId == teamId && mp.Match.GameNight.SeasonId == seasonId)
             .ToListAsync();
 
@@ -304,6 +353,9 @@ public class DashboardService : IDashboardService
                         var playerStats = typeGroup
                             .SelectMany(mp => mp.Match.PlayerStats.Where(ps => ps.PlayerId == playerId))
                             .ToList();
+                        var playerCheckouts = typeGroup
+                            .SelectMany(mp => mp.Match.Checkouts.Where(c => c.PlayerId == playerId))
+                            .ToList();
                         return new
                         {
                             Order = matchTypeOrder.TryGetValue(matchTypeId, out var order) ? order : int.MaxValue,
@@ -315,7 +367,10 @@ public class DashboardService : IDashboardService
                                 LegsWon = typeGroup.Sum(mp => mp.Match.LegsWon),
                                 LegsLost = typeGroup.Sum(mp => mp.Match.LegsLost),
                                 Tons = playerStats.Sum(ps => ps.Tons),
-                                Maximums = playerStats.Sum(ps => ps.Maximums)
+                                Maximums = playerStats.Sum(ps => ps.Maximums),
+                                HighestCheckout = playerCheckouts.Max(c => c.Score) ?? 0,
+                                CheckoutCount = playerCheckouts.Count,
+                                CheckoutTotal = playerCheckouts.Sum(c => c.Score ?? 0)
                             }
                         };
                     })

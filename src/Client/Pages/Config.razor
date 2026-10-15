@@ -30,6 +30,7 @@
                             <th>Start</th>
                             <th>End</th>
                             <th>Max Score</th>
+                            <th>Max Checkout</th>
                             <th>Matches</th>
                         </tr>
                     </thead>
@@ -41,6 +42,7 @@
                                 <td>@season.StartDate.ToShortDateString()</td>
                                 <td>@season.EndDate.ToShortDateString()</td>
                                 <td>@season.MaximumScore</td>
+                                <td>@season.MaximumCheckout</td>
                                 <td style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">@season.MatchConfigurations.Count slots</td>
                             </tr>
                         }
@@ -75,6 +77,10 @@
                     <div>
                         <FluentNumberField @bind-Value="newSeason.MaximumScore" Label="Maximum Score" style="width: 100%;" />
                         <div style="font-size: 0.8rem; color: var(--neutral-foreground-hint);">e.g. 180 (standard), 170 (cricket/bull)</div>
+                    </div>
+                    <div>
+                        <FluentNumberField @bind-Value="newSeason.MaximumCheckout" Label="Maximum Checkout" style="width: 100%;" />
+                        <div style="font-size: 0.8rem; color: var(--neutral-foreground-hint);">e.g. 170 (doubles &amp; trebles), 120 (doubles only)</div>
                     </div>
                 </div>
 
