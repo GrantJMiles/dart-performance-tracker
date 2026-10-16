@@ -5,16 +5,9 @@
 <div class="config-page">
     <h1 class="page-title">⚙️ Configuration</h1>
 
-    <FluentTabs ActiveTabId="@activeTab" ActiveTabIdChanged="@(id => SetTab(id))">
-        <FluentTab Id="seasons">📅 Seasons</FluentTab>
-        <FluentTab Id="teams">👥 Teams</FluentTab>
-        <FluentTab Id="players">👤 Players</FluentTab>
-    </FluentTabs>
-
-    <div class="config-section">
-
-        @if (activeTab == "seasons")
-        {
+    <FluentTabs @bind-ActiveTabId="activeTab" class="config-tabs">
+        <FluentTab Id="seasons" Label="📅 Seasons">
+        <div class="config-section">
             <p class="section-title">Seasons</p>
 
             @if (seasons == null)
@@ -23,7 +16,7 @@
             }
             else if (seasons.Any())
             {
-                <table class="config-table">
+                <table class="config-table config-table--stack">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -38,12 +31,12 @@
                         @foreach (var season in seasons)
                         {
                             <tr>
-                                <td><strong>@season.Name</strong></td>
-                                <td>@season.StartDate.ToShortDateString()</td>
-                                <td>@season.EndDate.ToShortDateString()</td>
-                                <td>@season.MaximumScore</td>
-                                <td>@season.MaximumCheckout</td>
-                                <td style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">@season.MatchConfigurations.Count slots</td>
+                                <td class="cell-title"><strong>@season.Name</strong></td>
+                                <td data-label="Start">@season.StartDate.ToString("dd MMM yyyy")</td>
+                                <td data-label="End">@season.EndDate.ToString("dd MMM yyyy")</td>
+                                <td data-label="Max Score">@season.MaximumScore</td>
+                                <td data-label="Max Checkout">@season.MaximumCheckout</td>
+                                <td data-label="Matches" class="cell-muted">@season.MatchConfigurations.Count slots</td>
                             </tr>
                         }
                     </tbody>
@@ -107,7 +100,7 @@
 
                         @if (newSeason.MatchConfigurations.Any())
                         {
-                            <div style="max-width: 420px; margin-bottom: 1rem;">
+                            <div class="match-slot-list">
                                 @for (int i = 0; i < newSeason.MatchConfigurations.Count; i++)
                                 {
                                     var idx = i;
@@ -139,10 +132,11 @@
                     <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Add Season</FluentButton>
                 </div>
             </EditForm>
-        }
+        </div>
+        </FluentTab>
 
-        else if (activeTab == "teams")
-        {
+        <FluentTab Id="teams" Label="👥 Teams">
+        <div class="config-section">
             <p class="section-title">Teams</p>
 
             @if (teams == null)
@@ -151,14 +145,14 @@
             }
             else if (teams.Any())
             {
-                <table class="config-table">
+                <table class="config-table config-table--stack">
                     <thead>
                         <tr><th>Name</th></tr>
                     </thead>
                     <tbody>
                         @foreach (var team in teams)
                         {
-                            <tr><td><strong>@team.Name</strong></td></tr>
+                            <tr><td class="cell-title"><strong>@team.Name</strong></td></tr>
                         }
                     </tbody>
                 </table>
@@ -181,10 +175,11 @@
                     </div>
                 </div>
             </EditForm>
-        }
+        </div>
+        </FluentTab>
 
-        else if (activeTab == "players")
-        {
+        <FluentTab Id="players" Label="👤 Players">
+        <div class="config-section">
             <p class="section-title">Players</p>
 
             @if (players == null)
@@ -193,7 +188,7 @@
             }
             else if (players.Any())
             {
-                <table class="config-table">
+                <table class="config-table config-table--stack">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -205,9 +200,9 @@
                         @foreach (var player in players)
                         {
                             <tr>
-                                <td><strong>@player.Name</strong></td>
-                                <td>@player.TeamName</td>
-                                <td>
+                                <td class="cell-title"><strong>@player.Name</strong></td>
+                                <td data-label="Team">@player.TeamName</td>
+                                <td data-label="Status">
                                     @if (player.IsActive)
                                     {
                                         <FluentBadge Appearance="Appearance.Accent">Active</FluentBadge>
@@ -255,9 +250,9 @@
                     </div>
                 </div>
             </EditForm>
-        }
-
-    </div>
+        </div>
+        </FluentTab>
+    </FluentTabs>
 </div>
 
 @code {
@@ -278,11 +273,6 @@
     protected override async Task OnInitializedAsync()
     {
         await Task.WhenAll(LoadSeasons(), LoadTeams(), LoadPlayers(), LoadMatchTypes());
-    }
-
-    private void SetTab(string? tab)
-    {
-        if (tab != null) activeTab = tab;
     }
 
     private async Task LoadSeasons() =>

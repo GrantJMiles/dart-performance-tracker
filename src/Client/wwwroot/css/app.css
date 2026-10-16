@@ -348,6 +348,20 @@ a:hover {
     align-items: end;
 }
 
+.config-tabs {
+    width: 100%;
+}
+
+.cell-muted {
+    color: var(--neutral-foreground-hint);
+    font-size: 0.875rem;
+}
+
+.match-slot-list {
+    max-width: 420px;
+    margin-bottom: 1rem;
+}
+
 /* ============================================================
    Validation
    ============================================================ */
@@ -374,6 +388,61 @@ a:hover {
 
     .config-form-row {
         grid-template-columns: 1fr;
+    }
+
+    .config-page {
+        padding: 1rem 0.5rem;
+    }
+
+    .config-section {
+        padding: 1rem;
+    }
+
+    .match-slot-list {
+        max-width: none;
+    }
+
+    /* Stack table rows into cards */
+    .config-table--stack thead {
+        display: none;
+    }
+
+    .config-table--stack,
+    .config-table--stack tbody {
+        display: block;
+    }
+
+    .config-table--stack tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .config-table--stack tr:last-child {
+        border-bottom: none;
+    }
+
+    .config-table--stack td {
+        display: block;
+        padding: 0;
+        border: none;
+    }
+
+    .config-table--stack td.cell-title {
+        grid-column: 1 / -1;
+        font-size: 1rem;
+    }
+
+    .config-table--stack td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-text-muted);
     }
 }
 
