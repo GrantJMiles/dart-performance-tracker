@@ -67,6 +67,24 @@ public class DashboardInsightsDto
     public MvpDto? SinglesMvp { get; set; }
     public MvpDto? SeasonMvp { get; set; }
     public PairsMvpDto? PairsMvp { get; set; }
+    public CheckoutLeaderDto? HighestCheckout { get; set; }
+    public CheckoutLeaderDto? MostCheckouts { get; set; }
+    public int MaximumCheckout { get; set; }
+    public List<MaxCheckoutHitDto> MaxCheckoutHits { get; set; } = new();
+}
+
+public class CheckoutLeaderDto
+{
+    /// <summary>All players tied for the lead.</summary>
+    public List<string> PlayerNames { get; set; } = new();
+    /// <summary>Highest checkout score, or number of checkouts, depending on the stat.</summary>
+    public int Value { get; set; }
+}
+
+public class MaxCheckoutHitDto
+{
+    public string PlayerName { get; set; } = string.Empty;
+    public int Count { get; set; }
 }
 
 public class MvpDto
@@ -111,6 +129,9 @@ public class PlayerMatchTypeBreakdownDto
     public int LegsLost { get; set; }
     public int Tons { get; set; }
     public int Maximums { get; set; }
+    public int HighestCheckout { get; set; }
+    public int CheckoutCount { get; set; }
+    public int CheckoutTotal { get; set; }
 }
 
 public class TopPairingDto

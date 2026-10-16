@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Match> Matches => Set<Match>();
     public DbSet<MatchPlayer> MatchPlayers => Set<MatchPlayer>();
     public DbSet<PlayerMatchStats> PlayerMatchStats => Set<PlayerMatchStats>();
+    public DbSet<LegCheckout> LegCheckouts => Set<LegCheckout>();
     public DbSet<ManOfTheMatch> ManOfTheMatches => Set<ManOfTheMatch>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,6 +37,12 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<PlayerMatchStats>()
             .HasIndex(ps => ps.PlayerId);
+
+        modelBuilder.Entity<LegCheckout>()
+            .HasIndex(lc => lc.MatchId);
+
+        modelBuilder.Entity<LegCheckout>()
+            .HasIndex(lc => lc.PlayerId);
 
         modelBuilder.Entity<GameNight>()
             .HasIndex(gn => gn.SeasonId);

@@ -7,6 +7,7 @@ public class SeasonDto
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public int MaximumScore { get; set; } = 180;
+    public int MaximumCheckout { get; set; } = 170;
     public List<SeasonMatchConfigurationDto> MatchConfigurations { get; set; } = new();
 }
 
@@ -16,6 +17,7 @@ public class CreateSeasonDto
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public int MaximumScore { get; set; } = 180;
+    public int MaximumCheckout { get; set; } = 170;
     public List<CreateSeasonMatchConfigurationDto> MatchConfigurations { get; set; } = new();
 }
 

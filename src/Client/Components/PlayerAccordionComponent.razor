@@ -25,6 +25,9 @@
                     <span class="player-col-stat">Win%</span>
                     <span class="player-col-stat">Tons</span>
                     <span class="player-col-stat">@($"{MaximumScore}s")</span>
+                    <span class="player-col-stat" title="Highest checkout">High CO</span>
+                    <span class="player-col-stat" title="Number of checkouts">COs</span>
+                    <span class="player-col-stat" title="Sum of all checkout scores">CO Total</span>
                     <span class="player-col-stat">+/-</span>
                     <span class="player-col-motm">MOTM</span>
                 </div>
@@ -36,6 +39,9 @@
                     var totalWon = breakdowns.Sum(b => b.MatchesWon);
                     var totalTons = breakdowns.Sum(b => b.Tons);
                     var totalMaximums = breakdowns.Sum(b => b.Maximums);
+                    var bestCheckout = breakdowns.Any() ? breakdowns.Max(b => b.HighestCheckout) : 0;
+                    var checkoutCount = breakdowns.Sum(b => b.CheckoutCount);
+                    var checkoutTotal = breakdowns.Sum(b => b.CheckoutTotal);
                     var totalLegsWon = breakdowns.Sum(b => b.LegsWon);
                     var totalLegsLost = breakdowns.Sum(b => b.LegsLost);
                     var legsDiff = totalLegsWon - totalLegsLost;
@@ -60,6 +66,9 @@
                         </span>
                         <span class="player-col-stat">@totalTons</span>
                         <span class="player-col-stat">@totalMaximums</span>
+                        <span class="player-col-stat">@(bestCheckout > 0 ? bestCheckout.ToString() : "—")</span>
+                        <span class="player-col-stat">@checkoutCount</span>
+                        <span class="player-col-stat">@checkoutTotal</span>
                         <span class="player-col-stat">
                             <span style="color: @(legsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(legsDiff >= 0 ? "+" : "")@legsDiff</span>
                         </span>
@@ -91,6 +100,9 @@
                                             <th style="padding: 4px 8px;">+/-</th>
                                             <th style="padding: 4px 8px;">Tons</th>
                                             <th style="padding: 4px 8px;">@($"{MaximumScore}s")</th>
+                                            <th style="padding: 4px 8px;">High CO</th>
+                                            <th style="padding: 4px 8px;">COs</th>
+                                            <th style="padding: 4px 8px;">CO Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -112,6 +124,9 @@
                                                 <td style="padding: 4px 8px; text-align: center; color: @(bLegsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)"); font-weight: 600;">@(bLegsDiff >= 0 ? "+" : "")@bLegsDiff</td>
                                                 <td style="padding: 4px 8px; text-align: center;">@breakdown.Tons</td>
                                                 <td style="padding: 4px 8px; text-align: center;">@breakdown.Maximums</td>
+                                                <td style="padding: 4px 8px; text-align: center;">@(breakdown.HighestCheckout > 0 ? breakdown.HighestCheckout.ToString() : "—")</td>
+                                                <td style="padding: 4px 8px; text-align: center;">@breakdown.CheckoutCount</td>
+                                                <td style="padding: 4px 8px; text-align: center;">@breakdown.CheckoutTotal</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -186,8 +201,14 @@
                 @foreach (var player in GetFilteredPlayers())
                 {
                     var recentForm = GetRecentForm(player);
+                    var cardBreakdowns = GetBreakdowns(player).ToList();
+                    var cardBestCheckout = cardBreakdowns.Any() ? cardBreakdowns.Max(b => b.HighestCheckout) : 0;
                     <div class="player-mobile-card" @onclick="() => OpenPlayerModal(player.PlayerId)">
                         <span class="player-mobile-name">@player.PlayerName</span>
+                        @if (cardBestCheckout > 0)
+                        {
+                            <span class="player-mobile-checkout" title="Highest checkout">🎯 @cardBestCheckout</span>
+                        }
                         <div class="player-mobile-form">
                             @foreach (var r in recentForm)
                             {
@@ -289,6 +310,9 @@
         var mWon = mBreakdowns.Sum(b => b.MatchesWon);
         var mTons = mBreakdowns.Sum(b => b.Tons);
         var mMaximums = mBreakdowns.Sum(b => b.Maximums);
+        var mBestCheckout = mBreakdowns.Any() ? mBreakdowns.Max(b => b.HighestCheckout) : 0;
+        var mCheckoutCount = mBreakdowns.Sum(b => b.CheckoutCount);
+        var mCheckoutTotal = mBreakdowns.Sum(b => b.CheckoutTotal);
         var mLegsWon = mBreakdowns.Sum(b => b.LegsWon);
         var mLegsLost = mBreakdowns.Sum(b => b.LegsLost);
         var mLegsDiff = mLegsWon - mLegsLost;
@@ -321,6 +345,18 @@
                     <div class="player-modal-stat">
                         <span class="player-modal-stat-value">@mMaximums</span>
                         <span class="player-modal-stat-label">@($"{MaximumScore}s")</span>
+                    </div>
+                    <div class="player-modal-stat">
+                        <span class="player-modal-stat-value">@(mBestCheckout > 0 ? mBestCheckout.ToString() : "—")</span>
+                        <span class="player-modal-stat-label">High CO</span>
+                    </div>
+                    <div class="player-modal-stat">
+                        <span class="player-modal-stat-value">@mCheckoutCount</span>
+                        <span class="player-modal-stat-label">COs</span>
+                    </div>
+                    <div class="player-modal-stat">
+                        <span class="player-modal-stat-value">@mCheckoutTotal</span>
+                        <span class="player-modal-stat-label">CO Total</span>
                     </div>
                     <div class="player-modal-stat">
                         <span class="player-modal-stat-value" style="color: @(mLegsDiff >= 0 ? "var(--color-won)" : "var(--color-lost)")">@(mLegsDiff >= 0 ? "+" : "")@mLegsDiff</span>
@@ -421,7 +457,7 @@
     .player-accordion-header-row,
     .player-accordion-row {
         display: grid;
-        grid-template-columns: 1fr 90px 60px 50px 60px 50px 50px 55px 60px;
+        grid-template-columns: 1fr 90px 60px 50px 60px 50px 50px 62px 48px 70px 55px 60px;
         align-items: center;
         padding: 8px 4px;
         gap: 4px;
@@ -536,6 +572,13 @@
         gap: 3px;
         align-items: center;
         flex-shrink: 0;
+    }
+
+    .player-mobile-checkout {
+        font-size: 0.78rem;
+        font-weight: 600;
+        flex-shrink: 0;
+        color: var(--neutral-foreground-hint, #aaa);
     }
 
     .player-mobile-chevron {

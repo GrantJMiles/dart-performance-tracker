@@ -61,6 +61,49 @@
                 }
             </div>
         }
+
+        @if (Match.Checkouts.Any())
+        {
+            <div style="margin-top: 0.75rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Checkouts <span style="font-weight: 400; color: var(--neutral-foreground-hint);">(optional)</span></label>
+                @for (var i = 0; i < Match.Checkouts.Count; i++)
+                {
+                    var slot = Match.Checkouts[i];
+                    var legNumber = i + 1;
+                    <div class="checkout-row">
+                        <span class="checkout-leg-label">Leg @legNumber</span>
+                        @if (Match.PlayerIds.Count > 1)
+                        {
+                            <div class="checkout-player-buttons">
+                                @foreach (var playerId in Match.PlayerIds)
+                                {
+                                    var isChosen = slot.PlayerId == playerId;
+                                    var chosenId = playerId;
+                                    <button type="button"
+                                            class="checkout-player-btn @(isChosen ? "selected" : "")"
+                                            aria-pressed="@isChosen"
+                                            @onclick="() => ToggleCheckoutPlayer(slot, chosenId)">@PlayerName(playerId)</button>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="stat-player-name">@(Match.PlayerIds.Count == 1 ? PlayerName(Match.PlayerIds[0]) : "Select a player above")</span>
+                        }
+                        <input type="number"
+                               class="checkout-input"
+                               inputmode="numeric"
+                               min="1"
+                               max="@MaximumCheckout"
+                               placeholder="Score"
+                               aria-label="@($"Leg {legNumber} checkout")"
+                               @key="@($"checkout_{i}_{clampRevision}")"
+                               value="@slot.Score"
+                               @onchange="e => SetCheckoutScore(slot, e.Value?.ToString())" />
+                    </div>
+                }
+            </div>
+        }
     </div>
 </FluentCard>
 
@@ -70,6 +113,12 @@
     [Parameter, EditorRequired] public UpdateMatchDto Match { get; set; } = null!;
     [Parameter] public int MatchNumber { get; set; } = 1;
     [Parameter] public int MaximumScore { get; set; } = 180;
+    [Parameter] public int MaximumCheckout { get; set; } = 170;
+
+    // Bumped when a typed checkout is clamped, so the input re-renders with the corrected value.
+    private int clampRevision;
+
+    protected override void OnParametersSet() => SyncCheckouts();
 
     private record ScoreOption(int Won, int Lost, string Label, string Theme);
 
@@ -85,6 +134,7 @@
     {
         Match.LegsWon = won;
         Match.LegsLost = lost;
+        SyncCheckouts();
     }
 
     private void OnPlayerIdsChanged(List<int> updatedIds)
@@ -92,6 +142,47 @@
         Match.PlayerStats.RemoveAll(s => !updatedIds.Contains(s.PlayerId));
         foreach (var id in updatedIds.Where(id => !Match.PlayerStats.Any(s => s.PlayerId == id)))
             Match.PlayerStats.Add(new CreatePlayerMatchStatsDto { PlayerId = id });
+        SyncCheckouts();
         StateHasChanged();
+    }
+
+    private string PlayerName(int playerId) =>
+        Players.FirstOrDefault(p => p.Id == playerId)?.Name ?? playerId.ToString();
+
+    // One checkout slot per leg the team won. A lone selected player is filled in automatically.
+    private void SyncCheckouts()
+    {
+        var legs = Math.Max(0, Match.LegsWon);
+        while (Match.Checkouts.Count < legs)
+            Match.Checkouts.Add(new CreateLegCheckoutDto());
+        if (Match.Checkouts.Count > legs)
+            Match.Checkouts.RemoveRange(legs, Match.Checkouts.Count - legs);
+
+        foreach (var slot in Match.Checkouts)
+        {
+            if (slot.PlayerId != 0 && !Match.PlayerIds.Contains(slot.PlayerId))
+                slot.PlayerId = 0;
+            if (Match.PlayerIds.Count == 1)
+                slot.PlayerId = Match.PlayerIds[0];
+        }
+    }
+
+    private void ToggleCheckoutPlayer(CreateLegCheckoutDto slot, int playerId)
+    {
+        slot.PlayerId = slot.PlayerId == playerId ? 0 : playerId;
+    }
+
+    // Blank clears the score; anything above the season's maximum checkout is capped.
+    private void SetCheckoutScore(CreateLegCheckoutDto slot, string? raw)
+    {
+        if (!int.TryParse(raw, out var value) || value <= 0)
+        {
+            slot.Score = null;
+        }
+        else
+        {
+            slot.Score = Math.Min(value, MaximumCheckout);
+            if (value > MaximumCheckout) clampRevision++;
+        }
     }
 }

@@ -9,5 +9,6 @@ public class Player
     public bool IsActive { get; set; } = true;
     public ICollection<MatchPlayer> MatchPlayers { get; set; } = new List<MatchPlayer>();
     public ICollection<PlayerMatchStats> Stats { get; set; } = new List<PlayerMatchStats>();
+    public ICollection<LegCheckout> Checkouts { get; set; } = new List<LegCheckout>();
     public ICollection<ManOfTheMatch> ManOfTheMatchAwards { get; set; } = new List<ManOfTheMatch>();
 }

@@ -35,6 +35,7 @@ public class MatchDto
     public int OrderIndex { get; set; }
     public List<int> PlayerIds { get; set; } = new();
     public List<PlayerMatchStatsDto> PlayerStats { get; set; } = new();
+    public List<LegCheckoutDto> Checkouts { get; set; } = new();
 }
 
 public class CreateMatchDto
@@ -46,6 +47,7 @@ public class CreateMatchDto
     public bool Won { get; set; }
     public List<int> PlayerIds { get; set; } = new();
     public List<CreatePlayerMatchStatsDto> PlayerStats { get; set; } = new();
+    public List<CreateLegCheckoutDto> Checkouts { get; set; } = new();
 }
 
 public class UpdateMatchDto
@@ -54,6 +56,7 @@ public class UpdateMatchDto
     public int LegsLost { get; set; }
     public List<int> PlayerIds { get; set; } = new();
     public List<CreatePlayerMatchStatsDto> PlayerStats { get; set; } = new();
+    public List<CreateLegCheckoutDto> Checkouts { get; set; } = new();
 }
 
 public class UpdateMotmDto
@@ -75,4 +78,19 @@ public class CreatePlayerMatchStatsDto
     public int PlayerId { get; set; }
     public int Tons { get; set; }
     public int Maximums { get; set; }
+}
+
+public class LegCheckoutDto
+{
+    public int Id { get; set; }
+    public int PlayerId { get; set; }
+    public string PlayerName { get; set; } = string.Empty;
+    public int? Score { get; set; }
+}
+
+public class CreateLegCheckoutDto
+{
+    /// <summary>0 means no player chosen for this leg yet; such entries are not saved.</summary>
+    public int PlayerId { get; set; }
+    public int? Score { get; set; }
 }

@@ -25,6 +25,7 @@ public class SeasonService : ISeasonService
                 StartDate = s.StartDate,
                 EndDate = s.EndDate,
                 MaximumScore = s.MaximumScore,
+                MaximumCheckout = s.MaximumCheckout,
                 MatchConfigurations = s.MatchConfigurations.Select(mc => new SeasonMatchConfigurationDto
                 {
                     Id = mc.Id,
@@ -46,6 +47,7 @@ public class SeasonService : ISeasonService
             StartDate = dto.StartDate,
             EndDate = dto.EndDate,
             MaximumScore = dto.MaximumScore,
+            MaximumCheckout = dto.MaximumCheckout,
             MatchConfigurations = dto.MatchConfigurations.Select(mc => new SeasonMatchConfiguration
             {
                 MatchTypeId = mc.MatchTypeId,
@@ -66,6 +68,7 @@ public class SeasonService : ISeasonService
             StartDate = created.StartDate,
             EndDate = created.EndDate,
             MaximumScore = created.MaximumScore,
+            MaximumCheckout = created.MaximumCheckout,
             MatchConfigurations = created.MatchConfigurations.Select(mc => new SeasonMatchConfigurationDto
             {
                 Id = mc.Id,

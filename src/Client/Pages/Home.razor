@@ -119,7 +119,7 @@
                 <div class="stats-carousel-title">
                     @slideTitle
                     <div class="carousel-dots mt-1">
-                        @for (int i = 0; i < 4; i++)
+                        @for (int i = 0; i < SlideTitles.Count; i++)
                         {
                             var idx = i;
                             <span class="carousel-dot @(currentSlide == idx ? "active" : "")" @onclick="() => currentSlide = idx"></span>
@@ -206,7 +206,7 @@
                         </div>
                     }
                 }
-                else
+                else if (currentSlide == 3)
                 {
                     @if (insightsLoading)
                     {
@@ -229,6 +229,53 @@
                             <p class="carousel-empty-hint">Record pairs match results to find your best duo.</p>
                         </div>
                     }
+                }
+                else if (currentSlide == 4)
+                {
+                    @if (insights?.HighestCheckout != null)
+                    {
+                        <div class="mvp-display">
+                            <div class="mvp-trophy">🎯</div>
+                            <div class="mvp-player-name">@string.Join(" & ", insights.HighestCheckout.PlayerNames)</div>
+                            <div class="mvp-stat-primary">@insights.HighestCheckout.Value checkout</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="carousel-empty-state">
+                            <span class="carousel-empty-icon">🎯</span>
+                            <p>No checkouts recorded yet.</p>
+                        </div>
+                    }
+                }
+                else if (currentSlide == 5)
+                {
+                    @if (insights?.MostCheckouts != null)
+                    {
+                        <div class="mvp-display">
+                            <div class="mvp-trophy">✅</div>
+                            <div class="mvp-player-name">@string.Join(" & ", insights.MostCheckouts.PlayerNames)</div>
+                            <div class="mvp-stat-primary">@insights.MostCheckouts.Value checkout@(insights.MostCheckouts.Value != 1 ? "s" : "")</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="carousel-empty-state">
+                            <span class="carousel-empty-icon">✅</span>
+                            <p>No checkouts recorded yet.</p>
+                        </div>
+                    }
+                }
+                else if (insights != null && insights.MaxCheckoutHits.Any())
+                {
+                    <div class="mvp-display">
+                        <div class="mvp-trophy">🔥</div>
+                        @foreach (var hit in insights.MaxCheckoutHits)
+                        {
+                            <div class="mvp-player-name">@hit.PlayerName</div>
+                            <div class="mvp-stat-primary">@(hit.Count > 1 ? $"{hit.Count}× " : "")@insights.MaximumCheckout checkout</div>
+                        }
+                    </div>
                 }
             </div>
         </div>
@@ -281,11 +328,25 @@
     private List<string> motmNames = new();
 
     private int currentSlide = 0;
-    private static readonly string[] SlideTitles = ["Team Form (Last 5)", "Singles MVP", "Season MVP", "Pairs MVPs"];
-    private string slideTitle => SlideTitles[currentSlide];
+    // The max-checkout slide only appears once someone has actually hit the season's maximum checkout.
+    private List<string> SlideTitles
+    {
+        get
+        {
+            var titles = new List<string>
+            {
+                "Team Form (Last 5)", "Singles MVP", "Season MVP", "Pairs MVPs", "Highest Checkout", "Most Checkouts"
+            };
+            if (insights != null && insights.MaxCheckoutHits.Any())
+                titles.Add($"{insights.MaximumCheckout} Club");
+            return titles;
+        }
+    }
 
-    private void PrevSlide() => currentSlide = (currentSlide + 3) % 4;
-    private void NextSlide() => currentSlide = (currentSlide + 1) % 4;
+    private string slideTitle => SlideTitles[Math.Min(currentSlide, SlideTitles.Count - 1)];
+
+    private void PrevSlide() => currentSlide = (currentSlide + SlideTitles.Count - 1) % SlideTitles.Count;
+    private void NextSlide() => currentSlide = (currentSlide + 1) % SlideTitles.Count;
 
     private List<GameNightSummaryDto> recentNights =>
         dashboard?.GameNightSummaries
