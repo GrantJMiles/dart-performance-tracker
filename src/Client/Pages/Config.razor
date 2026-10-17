@@ -226,16 +226,16 @@
                                         @if (player.IsActive)
                                         {
                                             <button type="button" class="status-badge status-badge--active"
-                                                    title="Click to deactivate"
+                                                    title="Click to set Inactive"
                                                     disabled="@(updatingPlayerId == player.Id)"
-                                                    @onclick="() => SetPlayerActive(player, false)">Active · Deactivate</button>
+                                                    @onclick="() => SetPlayerActive(player, false)">Active</button>
                                         }
                                         else
                                         {
                                             <button type="button" class="status-badge"
-                                                    title="Click to re-enable"
+                                                    title="Click to set Active"
                                                     disabled="@(updatingPlayerId == player.Id)"
-                                                    @onclick="() => SetPlayerActive(player, true)">Inactive · Re-enable</button>
+                                                    @onclick="() => SetPlayerActive(player, true)">Inactive</button>
                                         }
                                     </td>
                                 </tr>
@@ -402,7 +402,7 @@
         updatingPlayerId = player.Id;
         try
         {
-            var response = await Http.PatchAsJsonAsync($"api/players/{player.Id}/status", new UpdatePlayerStatusDto { IsActive = isActive });
+            var response = await Http.PostAsJsonAsync($"api/players/{player.Id}/status", new UpdatePlayerStatusDto { IsActive = isActive });
             if (response.IsSuccessStatusCode)
                 player.IsActive = isActive;
         }
