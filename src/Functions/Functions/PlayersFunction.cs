@@ -36,7 +36,7 @@ public class PlayersFunction(IPlayerService playerService)
 
     [Function("UpdatePlayerStatus")]
     public async Task<IActionResult> UpdateStatus(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "players/{id:int}/status")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "players/{id:int}/status")] HttpRequest req,
         int id)
     {
         var dto = await req.ReadFromJsonAsync<UpdatePlayerStatusDto>();
