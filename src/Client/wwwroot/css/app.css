@@ -352,6 +352,49 @@ a:hover {
     width: 100%;
 }
 
+.segmented-toggle {
+    display: inline-flex;
+    border: 1px solid var(--neutral-stroke-rest);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.segmented-toggle button {
+    background: transparent;
+    border: 0;
+    color: var(--neutral-foreground-rest);
+    padding: 0.5rem 1rem;
+    min-height: 40px;
+    cursor: pointer;
+}
+
+.segmented-toggle button.selected {
+    background: var(--accent-fill-rest);
+    color: var(--foreground-on-accent-rest);
+}
+
+.status-badge {
+    border: 1px solid var(--neutral-stroke-rest);
+    background: transparent;
+    color: var(--neutral-foreground-rest);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    min-height: 32px;
+    cursor: pointer;
+}
+
+.status-badge--active {
+    background: var(--accent-fill-rest);
+    border-color: transparent;
+    color: var(--foreground-on-accent-rest);
+}
+
+.status-badge:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 .cell-muted {
     color: var(--neutral-foreground-hint);
     font-size: 0.875rem;

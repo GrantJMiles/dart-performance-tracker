@@ -7,4 +7,5 @@ public interface IPlayerService
     Task<List<PlayerDto>> GetAllAsync();
     Task<PlayerDto?> GetByIdAsync(int id);
     Task<PlayerDto> CreateAsync(CreatePlayerDto dto);
+    Task<PlayerDto?> UpdateStatusAsync(int id, bool isActive);
 }

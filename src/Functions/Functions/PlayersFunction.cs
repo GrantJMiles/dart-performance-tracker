@@ -33,4 +33,15 @@ public class PlayersFunction(IPlayerService playerService)
         var created = await playerService.CreateAsync(dto);
         return new CreatedResult($"/api/players/{created.Id}", created);
     }
+
+    [Function("UpdatePlayerStatus")]
+    public async Task<IActionResult> UpdateStatus(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "players/{id:int}/status")] HttpRequest req,
+        int id)
+    {
+        var dto = await req.ReadFromJsonAsync<UpdatePlayerStatusDto>();
+        if (dto == null) return new BadRequestObjectResult("Invalid request body.");
+        var updated = await playerService.UpdateStatusAsync(id, dto.IsActive);
+        return updated == null ? new NotFoundResult() : new OkObjectResult(updated);
+    }
 }
