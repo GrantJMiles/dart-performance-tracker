@@ -58,4 +58,20 @@ public class PlayerService : IPlayerService
             IsActive = player.IsActive
         };
     }
+
+    public async Task<PlayerDto?> UpdateStatusAsync(int id, bool isActive)
+    {
+        var player = await _context.Players.Include(p => p.Team).FirstOrDefaultAsync(p => p.Id == id);
+        if (player == null) return null;
+        player.IsActive = isActive;
+        await _context.SaveChangesAsync();
+        return new PlayerDto
+        {
+            Id = player.Id,
+            Name = player.Name,
+            TeamId = player.TeamId,
+            TeamName = player.Team.Name,
+            IsActive = player.IsActive
+        };
+    }
 }

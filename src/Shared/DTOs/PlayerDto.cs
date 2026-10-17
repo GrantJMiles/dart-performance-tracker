@@ -15,3 +15,8 @@ public class CreatePlayerDto
     public int TeamId { get; set; }
     public bool IsActive { get; set; } = true;
 }
+
+public class UpdatePlayerStatusDto
+{
+    public bool IsActive { get; set; }
+}

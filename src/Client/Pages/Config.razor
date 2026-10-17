@@ -186,40 +186,69 @@
             {
                 <FluentProgressRing />
             }
-            else if (players.Any())
-            {
-                <table class="config-table config-table--stack">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Team</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var player in players)
-                        {
-                            <tr>
-                                <td class="cell-title"><strong>@player.Name</strong></td>
-                                <td data-label="Team">@player.TeamName</td>
-                                <td data-label="Status">
-                                    @if (player.IsActive)
-                                    {
-                                        <FluentBadge Appearance="Appearance.Accent">Active</FluentBadge>
-                                    }
-                                    else
-                                    {
-                                        <FluentBadge>Inactive</FluentBadge>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
             else
             {
-                <p style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">No players yet. Add one below.</p>
+                var activeCount = players.Count(p => p.IsActive);
+                var inactiveCount = players.Count - activeCount;
+                var visiblePlayers = players.Where(p => p.IsActive != showInactive).ToList();
+
+                <div class="segmented-toggle" role="tablist">
+                    <button type="button" role="tab" aria-selected="@((!showInactive).ToString().ToLower())"
+                            class="@(!showInactive ? "selected" : null)"
+                            @onclick="() => showInactive = false">Active (@activeCount)</button>
+                    <button type="button" role="tab" aria-selected="@(showInactive.ToString().ToLower())"
+                            class="@(showInactive ? "selected" : null)"
+                            @onclick="() => showInactive = true">Inactive (@inactiveCount)</button>
+                </div>
+
+                @if (showInactive)
+                {
+                    <p class="cell-muted">Inactive players are hidden from game-night selection but stay in the match history and stats.</p>
+                }
+
+                @if (visiblePlayers.Any())
+                {
+                    <table class="config-table config-table--stack">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Team</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var player in visiblePlayers)
+                            {
+                                <tr>
+                                    <td class="cell-title"><strong>@player.Name</strong></td>
+                                    <td data-label="Team">@player.TeamName</td>
+                                    <td data-label="Status">
+                                        @if (player.IsActive)
+                                        {
+                                            <button type="button" class="status-badge status-badge--active"
+                                                    title="Click to deactivate"
+                                                    disabled="@(updatingPlayerId == player.Id)"
+                                                    @onclick="() => SetPlayerActive(player, false)">Active · Deactivate</button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="status-badge"
+                                                    title="Click to re-enable"
+                                                    disabled="@(updatingPlayerId == player.Id)"
+                                                    @onclick="() => SetPlayerActive(player, true)">Inactive · Re-enable</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p style="color: var(--neutral-foreground-hint); font-size: 0.875rem;">
+                        @(showInactive ? "No inactive players." : "No active players. Add one below.")
+                    </p>
+                }
             }
 
             <FluentDivider Style="margin: 1rem 0;" />
@@ -267,6 +296,8 @@
     private CreateTeamDto newTeam = new();
     private CreatePlayerDto newPlayer = new() { IsActive = true };
     private int selectedMatchTypeId = 0;
+    private bool showInactive;
+    private int? updatingPlayerId;
 
     [Inject] private HttpClient Http { get; set; } = null!;
 
@@ -363,6 +394,21 @@
             var created = await response.Content.ReadFromJsonAsync<PlayerDto>();
             players?.Add(created!);
             newPlayer = new CreatePlayerDto { IsActive = true };
+        }
+    }
+
+    private async Task SetPlayerActive(PlayerDto player, bool isActive)
+    {
+        updatingPlayerId = player.Id;
+        try
+        {
+            var response = await Http.PatchAsJsonAsync($"api/players/{player.Id}/status", new UpdatePlayerStatusDto { IsActive = isActive });
+            if (response.IsSuccessStatusCode)
+                player.IsActive = isActive;
+        }
+        finally
+        {
+            updatingPlayerId = null;
         }
     }
 }
