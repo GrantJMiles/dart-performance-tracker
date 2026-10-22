@@ -76,6 +76,20 @@ The client reads `ApiBaseUrl` from `wwwroot/appsettings.Development.json` (alrea
 dotnet run --project src/Client/DartPerformanceTracker.Client.csproj
 ```
 
+### Option C — SQLite + seed data (no SQL Server, used in Claude Code cloud sessions)
+
+Runs Azurite, the Functions API (`:7071`) and the client (`:5211`) against a local SQLite file, seeded with a demo season:
+
+```bash
+scripts/setup-cloud.sh        # one-off: .NET 10 SDK, Functions Core Tools, Azurite (Ubuntu/apt)
+scripts/dev-up.sh             # start everything; --reset wipes and re-seeds the database
+node scripts/screenshot.mjs   # screenshots of the main pages -> screenshots/
+scripts/dev-down.sh           # stop everything
+```
+
+This is selected with `DATABASE_PROVIDER=Sqlite` (and `SEED_DEV_DATA=true`) in `src/Functions/local.settings.json`, which `dev-up.sh` generates.
+Production still uses SQL Server and EF migrations.
+
 ---
 
 ## Azure Deployment
