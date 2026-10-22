@@ -80,4 +80,28 @@ public class SeasonService : ISeasonService
             }).OrderBy(mc => mc.OrderIndex).ToList()
         };
     }
+
+    public async Task<SeasonDto?> UpdateAsync(int id, CreateSeasonDto dto)
+    {
+        var season = await _context.Seasons
+            .Include(s => s.MatchConfigurations)
+            .FirstOrDefaultAsync(s => s.Id == id);
+        if (season == null) return null;
+
+        season.Name = dto.Name;
+        season.StartDate = dto.StartDate;
+        season.EndDate = dto.EndDate;
+        season.MaximumScore = dto.MaximumScore;
+        season.MaximumCheckout = dto.MaximumCheckout;
+
+        _context.SeasonMatchConfigurations.RemoveRange(season.MatchConfigurations);
+        season.MatchConfigurations = dto.MatchConfigurations.Select(mc => new SeasonMatchConfiguration
+        {
+            MatchTypeId = mc.MatchTypeId,
+            OrderIndex = mc.OrderIndex
+        }).ToList();
+        await _context.SaveChangesAsync();
+
+        return (await GetAllAsync()).First(s => s.Id == id);
+    }
 }

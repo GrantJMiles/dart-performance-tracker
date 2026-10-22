@@ -24,4 +24,15 @@ public class SeasonsFunction(ISeasonService seasonService)
         var created = await seasonService.CreateAsync(dto);
         return new CreatedResult($"/api/seasons/{created.Id}", created);
     }
+
+    [Function("UpdateSeason")]
+    public async Task<IActionResult> Update(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "seasons/{id:int}")] HttpRequest req,
+        int id)
+    {
+        var dto = await req.ReadFromJsonAsync<CreateSeasonDto>();
+        if (dto == null) return new BadRequestObjectResult("Invalid request body.");
+        var updated = await seasonService.UpdateAsync(id, dto);
+        return updated == null ? new NotFoundResult() : new OkObjectResult(updated);
+    }
 }
