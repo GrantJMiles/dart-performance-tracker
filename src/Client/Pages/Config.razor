@@ -25,6 +25,7 @@
                             <th>Max Score</th>
                             <th>Max Checkout</th>
                             <th>Matches</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,6 +38,9 @@
                                 <td data-label="Max Score">@season.MaximumScore</td>
                                 <td data-label="Max Checkout">@season.MaximumCheckout</td>
                                 <td data-label="Matches" class="cell-muted">@season.MatchConfigurations.Count slots</td>
+                                <td>
+                                    <FluentButton Appearance="Appearance.Outline" @onclick="() => EditSeason(season)">Edit</FluentButton>
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -48,8 +52,8 @@
             }
 
             <FluentDivider Style="margin: 1rem 0;" />
-            <p class="section-title">Add Season</p>
-            <EditForm Model="newSeason" OnValidSubmit="AddSeason">
+            <p class="section-title">@(editingSeasonId == null ? "Add Season" : "Edit Season")</p>
+            <EditForm Model="newSeason" OnValidSubmit="SaveSeason">
                 <DataAnnotationsValidator />
                 <div class="config-form-row">
                     <div>
@@ -129,7 +133,11 @@
                 </div>
 
                 <div style="margin-top: 0.5rem;">
-                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Add Season</FluentButton>
+                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">@(editingSeasonId == null ? "Add Season" : "Save Changes")</FluentButton>
+                    @if (editingSeasonId != null)
+                    {
+                        <FluentButton Appearance="Appearance.Outline" @onclick="CancelEditSeason">Cancel</FluentButton>
+                    }
                 </div>
             </EditForm>
         </div>
@@ -295,6 +303,7 @@
     private CreateSeasonDto newSeason = new() { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(6) };
     private CreateTeamDto newTeam = new();
     private CreatePlayerDto newPlayer = new() { IsActive = true };
+    private int? editingSeasonId;
     private int selectedMatchTypeId = 0;
     private bool showInactive;
     private int? updatingPlayerId;
@@ -363,15 +372,52 @@
 
     // --- CRUD handlers ---
 
-    private async Task AddSeason()
+    private void EditSeason(SeasonDto season)
     {
+        editingSeasonId = season.Id;
+        selectedMatchTypeId = 0;
+        newSeason = new CreateSeasonDto
+        {
+            Name = season.Name,
+            StartDate = season.StartDate,
+            EndDate = season.EndDate,
+            MaximumScore = season.MaximumScore,
+            MaximumCheckout = season.MaximumCheckout,
+            MatchConfigurations = season.MatchConfigurations
+                .OrderBy(mc => mc.OrderIndex)
+                .Select(mc => new CreateSeasonMatchConfigurationDto { MatchTypeId = mc.MatchTypeId, OrderIndex = mc.OrderIndex })
+                .ToList()
+        };
+    }
+
+    private void CancelEditSeason()
+    {
+        editingSeasonId = null;
+        selectedMatchTypeId = 0;
+        newSeason = new CreateSeasonDto { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(6) };
+    }
+
+    private async Task SaveSeason()
+    {
+        if (editingSeasonId is int id)
+        {
+            var updateResponse = await Http.PutAsJsonAsync($"api/seasons/{id}", newSeason);
+            if (updateResponse.IsSuccessStatusCode)
+            {
+                var updated = await updateResponse.Content.ReadFromJsonAsync<SeasonDto>();
+                var index = seasons?.FindIndex(s => s.Id == id) ?? -1;
+                if (index >= 0) seasons![index] = updated!;
+                CancelEditSeason();
+            }
+            return;
+        }
+
         var response = await Http.PostAsJsonAsync("api/seasons", newSeason);
         if (response.IsSuccessStatusCode)
         {
             var created = await response.Content.ReadFromJsonAsync<SeasonDto>();
             seasons?.Add(created!);
-            newSeason = new CreateSeasonDto { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(6) };
-            selectedMatchTypeId = 0;
+            CancelEditSeason();
         }
     }
 
